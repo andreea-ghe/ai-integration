@@ -22,7 +22,6 @@ jobs:
         run: |
           pip install ollama
           ollama pull llama3
-          ollama serve
           pip install litellm
           pip install openai
           pip install python-dotenv
