@@ -10,64 +10,38 @@ jobs:
   code_review:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.1.1
+      - name: Checkout Repository
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: GrantBirki/git-diff-action@v2.4.0
-        id: git-diff
-        with:
-          raw_diff_file_output: diff.txt
-          file_output_only: "true"
-      - name: Get File to Merge
-        id: get_file
+      - name: Get Changed Files
+        id: changed-files
+        uses: tj-actions/changed-files@v44
+      - name: List All Changed Files
         run: |
-          # Fetch the latest changes
-          git fetch origin
-          
-          # Extract the file name to be merged from the diff
-          file_to_merge=$(git diff --name-only origin/main...HEAD | head -n 1)
-          
-          if [ -z "$file_to_merge" ]; then
-            echo "No file changes detected. Exiting."
-            exit 1
-          fi
-          
-          echo "Extracted file to merge: $file_to_merge"
-          echo "FILE_TO_MERGE=$file_to_merge" >> $GITHUB_ENV
-      - name: Print Environment Variables
-        run: |
-          echo "Environment Variables:"
-          printenv
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            echo "$file was changed"
+          done
       - name: Run Python Script
         id: run_python_script
         run: |
-          echo "Running chatbot.py with file: ${{ env.FILE_TO_MERGE }}"
-          python3 chatbot.py "${{ env.FILE_TO_MERGE }}" > script_output.txt
+          changed_files="${{ steps.changed-files.outputs.all_changed_files }}"
+          echo "Running chatbot.py with files: $changed_files"
+          python3 chatbot.py "$changed_files" > script_output.txt
           cat script_output.txt
       - name: Perform Code Review
         id: code_review_suggestions
         run: |
-          # Get the code changes
-          changed_code=$(cat ${{steps.git-diff.outputs.raw-diff-path}})
-          
-          echo "PR Changes $changed_code"
-          
-          # Escape newlines and double quotes in the changed_code
-          escaped_code=$(echo "$changed_code" | jq -s -R -r @json)
-        
           # Get the response from the script output
           response=$(cat script_output.txt)
           echo "This is the response: $response"
           
           # Here we assume the response is a simple string, not a JSON object
           echo "$response" > code_suggestions.txt
-
       - name: Add Code Suggestions Comment
         run: |
           cat code_suggestions.txt
-          
           escaped_comments=$(echo "$(cat code_suggestions.txt)" | jq -s -R -r @json)
-            
           curl -s -L \
             -X POST \
             -H "Accept: application/vnd.github+json" \
