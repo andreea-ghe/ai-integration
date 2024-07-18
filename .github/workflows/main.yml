@@ -19,31 +19,42 @@ jobs:
         id: git-diff
         with:
           raw_diff_file_output: diff.txt
-          file_output_only: "true" #Makes us exclude printing the diff on the console for security purposes
+          file_output_only: "true" # Makes us exclude printing the diff on the console for security purposes
 
-      - name: Perfom Code Review With gpt-4
+      - name: Check Diff File
+        run: |
+          echo "Checking diff file..."
+          ls -l diff.txt
+          cat diff.txt
+
+      - name: Perform Code Review With gpt-4
         id: code_review_suggestions
         run: |
           # Get the code changes
-          changed_code=$(cat ${{steps.git-diff.outputs.raw-diff-path}})
+          changed_code=$(cat diff.txt)
           
-          echo "PR Changes $changed_code"
+          echo "PR Changes: $changed_code"
           
           # Escape newlines and double quotes in the changed_code
           escaped_code=$(echo "$changed_code" | jq -s -R -r @json)
           
+          echo "Escaped code: $escaped_code"
+          
+          # Construct the JSON payload
+          json_payload=$(jq -n \
+            --arg model "gpt-4" \
+            --arg system_content "${{ vars.CODE_REVIEW_PROMPT }}" \
+            --arg user_content "$escaped_code" \
+            '{model: $model, messages: [{role: "system", content: $system_content}, {role: "user", content: $user_content}] }')
+
+          echo "JSON Payload: $json_payload"
+
           response=$(curl -s https://api.openai.com/v1/chat/completions \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer ${{ secrets.OPENAI_API_KEY }}" \
-            -d "{
-              \"model\": \"gpt-4\",
-              \"messages\": [
-                { \"role\": \"system\", \"content\": \"${{ vars.CODE_REVIEW_PROMPT }}\" },
-                { \"role\": \"user\", \"content\": $escaped_code }
-              ]
-            }")
+            -d "$json_payload")
           
-          echo "This is the response $response"
+          echo "This is the response: $response"
           
           code_review_suggestions=$(echo "$response" | jq -r '.choices[0].message.content')
           
