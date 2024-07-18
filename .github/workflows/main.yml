@@ -21,7 +21,8 @@ jobs:
       - name: Install Dependencies
         run: |
           pip install ollama
-          ollama run llama3
+          ollama pull llama3
+          ollama serve
           pip install litellm
           pip install openai
           pip install python-dotenv
