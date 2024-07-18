@@ -6,7 +6,6 @@ permissions:
   contents: read
   issues: write
   pull-requests: write
-
 jobs:
   code_review:
     runs-on: ubuntu-latest
@@ -14,59 +13,26 @@ jobs:
       - uses: actions/checkout@v4.1.1
         with:
           fetch-depth: 0
-
-      - uses: GrantBirki/git-diff-action@v2.4.0  # A GitHub action for gathering the git diff of our pull request
+      - uses: GrantBirki/git-diff-action@v2.4.0
         id: git-diff
         with:
           raw_diff_file_output: diff.txt
-          file_output_only: "true" # Makes us exclude printing the diff on the console for security purposes
-
-      - name: Check Diff File
-        run: |
-          echo "Checking diff file..."
-          ls -l diff.txt
-          cat diff.txt
-
-      - name: Perform Code Review With gpt-4
+          file_output_only: "true"
+      - name: Perform Code Review
         id: code_review_suggestions
         run: |
           # Get the code changes
-          changed_code=$(cat diff.txt)
+          changed_code=$(cat ${{steps.git-diff.outputs.raw-diff-path}})
           
-          echo "PR Changes: $changed_code"
+          echo "PR Changes $changed_code"
           
           # Escape newlines and double quotes in the changed_code
           escaped_code=$(echo "$changed_code" | jq -s -R -r @json)
+        
+          response=$(echo "Hello andreea")
+          echo "This is the response $response"
           
-          echo "Escaped code: $escaped_code"
-          
-          # Construct the JSON payload
-          json_payload=$(jq -n \
-            --arg model "gpt-4" \
-            --arg system_content "${{ vars.CODE_REVIEW_PROMPT }}" \
-            --arg user_content "$escaped_code" \
-            '{model: $model, messages: [{role: "system", content: $system_content}, {role: "user", content: $user_content}] }')
-
-          echo "JSON Payload: $json_payload"
-
-          response=$(curl -s -o response.json -w "%{http_code}" https://api.openai.com/v1/chat/completions \
-            -H "Content-Type: application/json" \
-            -H "Authorization: Bearer ${{ secrets.OPENAI_API_KEY }}" \
-            -d "$json_payload")
-          
-          http_code=$(cat response.json | jq -r '.status')
-          response_body=$(cat response.json | jq -r '.body')
-
-          echo "HTTP Code: $http_code"
-          echo "Response Body: $response_body"
-
-          if [ "$http_code" -ne 200 ]; then
-            echo "Request failed with status code $http_code"
-            echo "Response Body: $response_body"
-            exit 1
-          fi
-
-          code_review_suggestions=$(echo "$response_body" | jq -r '.choices[0].message.content')
+          code_review_suggestions=$(echo "$response" | jq -r '.choices[0].message.content')
           
           echo "$code_review_suggestions" > code_suggestions.txt
 
@@ -75,11 +41,13 @@ jobs:
           cat code_suggestions.txt
           
           escaped_comments=$(echo "$(cat code_suggestions.txt)" | jq -s -R -r @json)
-          
+            
           curl -s -L \
             -X POST \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ secrets.GIT_TOKEN }}" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.number }}/comments \
-            -d "{\"body\":$escaped_comments\"}"
+            -d "{\"body\":$escaped_comments}"
+
+            
