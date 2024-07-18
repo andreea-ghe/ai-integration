@@ -20,6 +20,7 @@ jobs:
           python-version: '3.11'
       - name: Install Dependencies
         run: |
+          pip install ollama
           ollama run llama3
           pip install litellm
           pip install openai
