@@ -27,6 +27,7 @@ jobs:
       - name: Run Python Script
         id: run_python_script
         run: |
+          echo "Running chatbot.py with file: ${{ env.FILE_TO_MERGE }}"
           python3 chatbot.py ${{ env.FILE_TO_MERGE }} > script_output.txt
           cat script_output.txt
       - name: Perform Code Review
