@@ -17,5 +17,4 @@ if __name__ == "__main__":
     files = sys.argv[1]
     result = review_code(files)
     print(result)
-    print("oh noo")
 
