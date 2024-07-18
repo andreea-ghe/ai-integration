@@ -1,3 +1,5 @@
-# changed code
-print("hello world")
-print("hello andreea")
+import sys
+
+# total arguments
+n = len(sys.argv)
+print("Total arguments passed:", n)
