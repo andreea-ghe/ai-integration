@@ -22,6 +22,7 @@ jobs:
         id: run_python_script
         run: |
           python3 hello.py > script_output.txt
+          cat script_output.txt
       - name: Perform Code Review
         id: code_review_suggestions
         run: |
@@ -33,12 +34,12 @@ jobs:
           # Escape newlines and double quotes in the changed_code
           escaped_code=$(echo "$changed_code" | jq -s -R -r @json)
         
-          response=$(cat script_output.txt)
-          echo "This is the response $response"
+          # Using PowerShell to remove newlines and carriage returns
+          response=$(cat script_output.txt | Out-String | % { $_.Trim() })
+          echo "This is the response: $response"
           
-          code_review_suggestions=$(echo "$response" | jq -r '.choices[0].message.content')
-          
-          echo "$code_review_suggestions" > code_suggestions.txt
+          # Here we assume the response is a simple string, not a JSON object
+          echo "$response" > code_suggestions.txt
 
       - name: Add Code Suggestions Comment
         run: |
