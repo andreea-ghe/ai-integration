@@ -32,7 +32,7 @@ jobs:
           response=$(echo "Hello andreea")
           echo "This is the response $response"
           
-          code_review_suggestions=$(echo "$response" | jq -r '.choices[0].message.content')
+          code_review_suggestions=$(echo "$response")
           
           echo "$code_review_suggestions" > code_suggestions.txt
 
@@ -49,5 +49,3 @@ jobs:
             -H "X-GitHub-Api-Version: 2022-11-28" \
             https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.number }}/comments \
             -d "{\"body\":$escaped_comments}"
-
-            
