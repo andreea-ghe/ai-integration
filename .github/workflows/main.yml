@@ -23,12 +23,17 @@ jobs:
         run: |
           # Extract the file name to be merged from the diff
           file_to_merge=$(git diff --name-only | head -n 1)
+          echo "Extracted file to merge: $file_to_merge"
           echo "FILE_TO_MERGE=$file_to_merge" >> $GITHUB_ENV
+      - name: Print Environment Variables
+        run: |
+          echo "Environment Variables:"
+          printenv
       - name: Run Python Script
         id: run_python_script
         run: |
           echo "Running chatbot.py with file: ${{ env.FILE_TO_MERGE }}"
-          python3 chatbot.py ${{ env.FILE_TO_MERGE }} > script_output.txt
+          python3 chatbot.py "${{ env.FILE_TO_MERGE }}" > script_output.txt
           cat script_output.txt
       - name: Perform Code Review
         id: code_review_suggestions
