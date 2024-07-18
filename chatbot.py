@@ -1,9 +1,6 @@
 import sys
 import openai
-import git
 import os
-import shutil
-import stat
 from dotenv import load_dotenv
 
 load_dotenv()
