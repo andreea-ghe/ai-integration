@@ -34,8 +34,8 @@ jobs:
           # Escape newlines and double quotes in the changed_code
           escaped_code=$(echo "$changed_code" | jq -s -R -r @json)
         
-          # Using PowerShell to remove newlines and carriage returns
-          response=$(cat script_output.txt | Out-String | % { $_.Trim() })
+          # Sanitize the response
+          response=$(cat script_output.txt)
           echo "This is the response: $response"
           
           # Here we assume the response is a simple string, not a JSON object
