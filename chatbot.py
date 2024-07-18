@@ -12,7 +12,8 @@ def generate_feedback(code):
     messages=[
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": f"Please review the following code and provide feedback:\n\n{code}"}
-        ]
+        ],
+    api_base="http://localhost:11434"
     )
 
     return response['choices'][0]['message']['content']
