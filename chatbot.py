@@ -9,7 +9,6 @@ load_dotenv()
 openai.api_key = os.getenv('OPENAI_API_KEY')
 
 
-# Path where the repository will be cloned
 repo_path = 'C:\\Users\\Computacenter\\vs\\coderv_experiment\\repo'  
 
 def get_code_files(repo_path):
