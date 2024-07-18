@@ -22,7 +22,7 @@ jobs:
         id: get_file
         run: |
           # Extract the file name to be merged from the diff
-          file_to_merge=$(git diff --name-only | head -n 1)
+          file_to_merge=$(git diff --name-only origin/main...HEAD | head -n 1)
           echo "Extracted file to merge: $file_to_merge"
           echo "FILE_TO_MERGE=$file_to_merge" >> $GITHUB_ENV
       - name: Print Environment Variables
