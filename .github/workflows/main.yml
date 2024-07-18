@@ -20,6 +20,7 @@ jobs:
           python-version: '3.x'
       - name: Install Dependencies
         run: |
+          pip install litellm
           pip install openai
           pip install python-dotenv
       - name: Get Changed Files
