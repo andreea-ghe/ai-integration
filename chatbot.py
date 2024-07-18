@@ -29,7 +29,7 @@ def read_file(file_path):
 def generate_feedback(code):
     """Generate feedback using OpenAI GPT model."""
     response = openai.chat.completions.create(
-        model="gpt-4",  # You can use other models as well
+        model="gpt-4",  
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": f"Please review the following code and provide feedback:\n\n{code}"}
