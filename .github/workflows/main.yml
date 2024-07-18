@@ -18,6 +18,10 @@ jobs:
         with:
           raw_diff_file_output: diff.txt
           file_output_only: "true"
+      - name: Run Python Script
+        id: run_python_script
+        run: |
+          python3 hello.py > script_output.txt
       - name: Perform Code Review
         id: code_review_suggestions
         run: |
@@ -29,10 +33,10 @@ jobs:
           # Escape newlines and double quotes in the changed_code
           escaped_code=$(echo "$changed_code" | jq -s -R -r @json)
         
-          response=$(echo "Hello andreea")
+          response=$(cat script_output.txt)
           echo "This is the response $response"
           
-          code_review_suggestions=$(echo "$response")
+          code_review_suggestions=$(echo "$response" | jq -r '.choices[0].message.content')
           
           echo "$code_review_suggestions" > code_suggestions.txt
 
