@@ -15,7 +15,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: GrantBirki/git-diff-action@v2.4.0  # A github action for gathering the git diff of our pull request
+      - uses: GrantBirki/git-diff-action@v2.4.0  # A GitHub action for gathering the git diff of our pull request
         id: git-diff
         with:
           raw_diff_file_output: diff.txt
@@ -49,14 +49,24 @@ jobs:
 
           echo "JSON Payload: $json_payload"
 
-          response=$(curl -s https://api.openai.com/v1/chat/completions \
+          response=$(curl -s -o response.json -w "%{http_code}" https://api.openai.com/v1/chat/completions \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer ${{ secrets.OPENAI_API_KEY }}" \
             -d "$json_payload")
           
-          echo "This is the response: $response"
-          
-          code_review_suggestions=$(echo "$response" | jq -r '.choices[0].message.content')
+          http_code=$(cat response.json | jq -r '.status')
+          response_body=$(cat response.json | jq -r '.body')
+
+          echo "HTTP Code: $http_code"
+          echo "Response Body: $response_body"
+
+          if [ "$http_code" -ne 200 ]; then
+            echo "Request failed with status code $http_code"
+            echo "Response Body: $response_body"
+            exit 1
+          fi
+
+          code_review_suggestions=$(echo "$response_body" | jq -r '.choices[0].message.content')
           
           echo "$code_review_suggestions" > code_suggestions.txt
 
