@@ -18,10 +18,16 @@ jobs:
         with:
           raw_diff_file_output: diff.txt
           file_output_only: "true"
+      - name: Get File to Merge
+        id: get_file
+        run: |
+          # Extract the file name to be merged from the diff
+          file_to_merge=$(git diff --name-only | head -n 1)
+          echo "FILE_TO_MERGE=$file_to_merge" >> $GITHUB_ENV
       - name: Run Python Script
         id: run_python_script
         run: |
-          python3 hello.py > script_output.txt
+          python3 chatbot.py ${{ env.FILE_TO_MERGE }} > script_output.txt
           cat script_output.txt
       - name: Perform Code Review
         id: code_review_suggestions
@@ -34,7 +40,7 @@ jobs:
           # Escape newlines and double quotes in the changed_code
           escaped_code=$(echo "$changed_code" | jq -s -R -r @json)
         
-          # Sanitize the response
+          # Get the response from the script output
           response=$(cat script_output.txt)
           echo "This is the response: $response"
           
