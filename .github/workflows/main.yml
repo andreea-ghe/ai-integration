@@ -1,11 +1,3 @@
-name: GPT Code Review
-
-on:
-  pull_request:
-permissions:
-  contents: read
-  issues: write
-  pull-requests: write
 jobs:
   code_review:
     runs-on: ubuntu-latest
@@ -23,6 +15,12 @@ jobs:
           pip install litellm
           pip install openai
           pip install python-dotenv
+      - name: Start Ollama Service
+        run: |
+          # Command to start Ollama service
+          # Ensure the service starts in the background
+          nohup path/to/ollama-service &
+
       - name: Get Changed Files
         id: changed-files
         uses: tj-actions/changed-files@v44
@@ -44,7 +42,7 @@ jobs:
           # Get the response from the script output
           response=$(cat script_output.txt)
           echo "This is the response: $response"
-          
+
           # Here we assume the response is a simple string, not a JSON object
           echo "$response" > code_suggestions.txt
       - name: Add Code Suggestions Comment
