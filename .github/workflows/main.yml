@@ -13,7 +13,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
         with:
-          fetch-depth: 0 # Fetch all history for all branches
+          fetch-depth: 0
 
       - name: Install Ollama
         run: |
@@ -23,10 +23,7 @@ jobs:
         run: |
           nohup ollama serve &
 
-          # A short pause to ensure the service starts
           sleep 5
-
-          # Verify the service is running
           curl -i http://localhost:11434
 
       - name: Pull Llama3 Model
@@ -39,8 +36,7 @@ jobs:
           pip install litellm openai python-dotenv
 
       - name: Fetch Base Branch
-        run: |
-          git fetch origin main:main
+        run: git fetch origin main:main
 
       - name: Get Changed Files
         id: changed-files
@@ -64,29 +60,39 @@ jobs:
           done
 
       - name: Run Python Script
+        id: run-script
         run: |
           changed_files="${{ steps.changed-files.outputs.all_changed_files }}"
           echo "Running chatbot.py with files: $changed_files"
           python3 chatbot.py "$changed_files" > script_output.txt
           cat script_output.txt
 
-      - name: Perform Code Review
+      - name: Parse and Output Reviews
+        id: parse-output
         run: |
-          # Get the response from the script output
-          response=$(cat script_output.txt)
-          echo "This is the response: $response"
+          reviews=""
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            review=$(grep -Pzo "(?<=::set-output name=$file::).*" script_output.txt)
+            reviews="$reviews\n$file=$review"
+          done
+          echo -e "$reviews" > reviews.txt
+          cat reviews.txt
 
-          # Here we assume the response is a simple string, not a JSON object
-          echo "$response" > code_suggestions.txt
-
-      - name: Add Code Suggestions Comment
+      - name: Add Code Suggestions Comments
         run: |
-          cat code_suggestions.txt
-          escaped_comments=$(echo "$(cat code_suggestions.txt)" | jq -s -R -r @json)
-          curl -s -L \
-            -X POST \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${{ secrets.MY_GITHUB_TOKEN }}" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.number }}/comments \
-            -d "{\"body\":$escaped_comments}"
+          cat reviews.txt | while read line; do
+            file=$(echo $line | cut -d= -f1)
+            review=$(echo $line | cut -d= -f2-)
+            diff_file="diffs/$file.diff"
+            if [ -f "$diff_file" ]; then
+              line_number=$(grep -n "^+" "$diff_file" | head -n 1 | cut -d: -f1)
+              echo "Posting review for $file at line $line_number"
+              curl -s -L \
+                -X POST \
+                -H "Accept: application/vnd.github+json" \
+                -H "Authorization: Bearer ${{ secrets.MY_GITHUB_TOKEN }}" \
+                -H "X-GitHub-Api-Version: 2022-11-28" \
+                https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.number }}/comments \
+                -d "$(jq -n --arg body "$review" --arg path "$file" --argjson position $line_number '{body: $body, path: $path, position: $position}')"
+            fi
+          done
