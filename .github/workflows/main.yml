@@ -38,7 +38,6 @@ jobs:
       - name: Fetch Base Branch
         run: git fetch origin main:main
 
-
       - name: Get Changed Files
         id: changed-files
         uses: tj-actions/changed-files@v34
@@ -71,6 +70,8 @@ jobs:
         id: parse-output
         run: |
           reviews=""
+          file=""
+          review=""
           while IFS= read -r line; do
             if [[ "$line" == "FILE:"* ]]; then
               file=$(echo $line | cut -d' ' -f2)
@@ -78,6 +79,10 @@ jobs:
               review=$(echo $line | cut -d' ' -f2-)
             elif [[ "$line" == "ENDREVIEW" ]]; then
               reviews="$reviews\n$file=$review"
+              file=""
+              review=""
+            else
+              review="$review\n$line"
             fi
           done < script_output.txt
           echo -e "$reviews" > reviews.txt
