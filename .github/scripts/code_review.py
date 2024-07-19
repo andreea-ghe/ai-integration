@@ -37,6 +37,13 @@ try:
 except Exception as e:
     raise ValueError(f"Error getting pull request: {pr_number}\n{e}")
 
+# Try to get the commit object
+try:
+    commit = repo.get_commit(commit_sha)
+    print(f"Successfully accessed the commit: {commit.sha}")
+except Exception as e:
+    raise ValueError(f"Error getting commit: {commit_sha}\n{e}")
+
 def generate_feedback(code):
     """Generate feedback using OpenAI GPT model."""
     system_message = f"""\
@@ -95,7 +102,7 @@ def review_code(files):
         review_results.append((file_name, answer))
     return review_results
 
-def post_review_comments(pr, review_results, commit_sha):
+def post_review_comments(pr, review_results, commit):
     for file_name, review in review_results:
         # Fetch the file from the PR to get the patch (diff) details
         for file in pr.get_files():
@@ -106,7 +113,7 @@ def post_review_comments(pr, review_results, commit_sha):
                     if diff_line.startswith('+') and not diff_line.startswith('+++'):
                         pr.create_review_comment(
                             body=review,
-                            commit=commit_sha,
+                            commit=commit,
                             path=file_name,
                             line=index + 1  # Line number in the file
                         )
@@ -116,4 +123,4 @@ def post_review_comments(pr, review_results, commit_sha):
 if __name__ == "__main__":
     changed_files = list(pr.get_files())
     review_results = review_code(changed_files)
-    post_review_comments(pr, review_results, commit_sha)
+    post_review_comments(pr, review_results, commit)
