@@ -88,8 +88,8 @@ def post_review_comments(review_results):
                 diff_lines = file_diff.splitlines()
                 for diff_line in diff_lines:
                     if diff_line.startswith('+') and not diff_line.startswith('+++'):
-                        line_number = diff_lines.index(diff_line)
-                        pr.create_review_comment(body=review, path=file_name, position=line_number)
+                        line_number = diff_lines.index(diff_line) + 1
+                        pr.create_review_comment(body=review, commit_id=pr.head.sha, path=file_name, line=line_number)
                         break
                 break
 
