@@ -1,5 +1,4 @@
 import os
-import openai
 from dotenv import load_dotenv
 from litellm import completion
 from github import Github
@@ -9,17 +8,32 @@ load_dotenv()
 
 # Initialize GitHub client
 token = os.getenv('GITHUB_TOKEN')
+repo_name = os.getenv('GITHUB_REPOSITORY')
+pr_number = os.getenv('PR_NUMBER')
+
+print(f"GITHUB_TOKEN is set: {'Yes' if token else 'No'}")
+print(f"GITHUB_REPOSITORY: {repo_name}")
+print(f"PR_NUMBER: {pr_number}")
+
+# Check if the environment variables are correctly set
+if token is None or repo_name is None or pr_number is None:
+    raise ValueError("GITHUB_TOKEN, GITHUB_REPOSITORY, or PR_NUMBER is not set.")
+
 g = Github(token)
-repo = g.get_repo(os.getenv('GITHUB_REPOSITORY'))
 
-# Extract pull request number from GITHUB_REF
-ref = os.getenv('GITHUB_REF')
-if ref.startswith('refs/pull/'):
-    pr_number = ref.split('/')[2]
-else:
-    raise ValueError(f"Unexpected GITHUB_REF format: {ref}")
+# Try to get the repository
+try:
+    repo = g.get_repo(repo_name)
+    print(f"Successfully accessed the repository: {repo.full_name}")
+except Exception as e:
+    raise ValueError(f"Error getting repository: {repo_name}\n{e}")
 
-pr = repo.get_pull(int(pr_number))
+# Try to get the pull request
+try:
+    pr = repo.get_pull(int(pr_number))
+    print(f"Successfully accessed the pull request: {pr.title}")
+except Exception as e:
+    raise ValueError(f"Error getting pull request: {pr_number}\n{e}")
 
 def generate_feedback(code):
     """Generate feedback using OpenAI GPT model."""
@@ -72,9 +86,9 @@ Your review:"""
 
 def review_code(files):
     review_results = []
-    for file_name in files:
-        with open(file_name, 'r') as file:
-            code = file.read()
+    for file in files:
+        file_name = file.filename
+        code = file.patch
         answer = generate_feedback(code)
         review_results.append((file_name, answer))
     return review_results
@@ -89,11 +103,11 @@ def post_review_comments(review_results):
                 for diff_line in diff_lines:
                     if diff_line.startswith('+') and not diff_line.startswith('+++'):
                         line_number = diff_lines.index(diff_line) + 1
-                        pr.create_review_comment(body=review, commit_id=pr.head.sha, path=file_name, line=line_number)
+                        pr.create_review_comment(body=review, path=file_name, position=line_number)
                         break
                 break
 
 if __name__ == "__main__":
-    changed_files = [f.filename for f in pr.get_files()]
+    changed_files = list(pr.get_files())
     review_results = review_code(changed_files)
     post_review_comments(review_results)
