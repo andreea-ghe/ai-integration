@@ -107,9 +107,14 @@ jobs:
             review=$(echo $line | cut -d= -f2-)
             diff_file="diffs/$file.diff"
             if [ -f "$diff_file" ]; then
+              # Extract the first diff hunk
               diff_hunk=$(awk '/^@@/ {print; exit}' "$diff_file")
+              # Find the line position of the first change
               position=$(awk '/^@@/ {print NR+1; exit}' "$diff_file")
               echo "Posting review for $file at position $position"
+              echo "Commit ID: $commit_id"
+              echo "Diff hunk: $diff_hunk"
+              echo "Review: $review"
               curl -s -L \
                 -X POST \
                 -H "Accept: application/vnd.github+json" \
