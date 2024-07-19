@@ -56,7 +56,12 @@ jobs:
           changed_files="${{ steps.changed-files.outputs.all_changed_files }}"
           echo "Generating diffs for: $changed_files"
           for file in $changed_files; do
-            git diff origin/main -- $file > diffs/$file.diff
+            if git diff origin/main -- $file > diffs/$file.diff; then
+              echo "Diff for $file generated successfully."
+            else
+              echo "No diff generated for $file. Skipping."
+              rm -f diffs/$file.diff
+            fi
           done
 
       - name: Run Python Script
@@ -74,7 +79,7 @@ jobs:
         run: |
           commit_id=${{ env.commit_id }}
           reviews=$(cat reviews.txt)
-          IFS=$'\n' read -d '' -r -a lines <<< "$reviews"
+          IFS=$'\n' read -r -d '' -a lines <<< "$reviews"
           file=""
           review=""
           for line in "${lines[@]}"; do
