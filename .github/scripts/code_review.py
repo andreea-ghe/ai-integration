@@ -11,7 +11,14 @@ load_dotenv()
 token = os.getenv('GITHUB_TOKEN')
 g = Github(token)
 repo = g.get_repo(os.getenv('GITHUB_REPOSITORY'))
-pr_number = os.getenv('GITHUB_REF').split('/')[-1]
+
+# Extract pull request number from GITHUB_REF
+ref = os.getenv('GITHUB_REF')
+if ref.startswith('refs/pull/'):
+    pr_number = ref.split('/')[2]
+else:
+    raise ValueError(f"Unexpected GITHUB_REF format: {ref}")
+
 pr = repo.get_pull(int(pr_number))
 
 def generate_feedback(code):
@@ -48,7 +55,7 @@ illustration purposes only and should not be repeated.
 
 Code:
 {code}
-
+    
 Your review:"""
 
     response = completion(
