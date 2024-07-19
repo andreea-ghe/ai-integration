@@ -82,12 +82,15 @@ def review_code(files):
 def post_review_comments(review_results):
     for file_name, review in review_results:
         # Fetch the file from the PR to get the patch (diff) details
-        file_diff = pr.get_files().get(filename=file_name).patch
-        diff_lines = file_diff.splitlines()
-        for diff_line in diff_lines:
-            if diff_line.startswith('+') and not diff_line.startswith('+++'):
-                line_number = diff_lines.index(diff_line)
-                pr.create_review_comment(body=review, path=file_name, position=line_number)
+        for file in pr.get_files():
+            if file.filename == file_name:
+                file_diff = file.patch
+                diff_lines = file_diff.splitlines()
+                for diff_line in diff_lines:
+                    if diff_line.startswith('+') and not diff_line.startswith('+++'):
+                        line_number = diff_lines.index(diff_line)
+                        pr.create_review_comment(body=review, path=file_name, position=line_number)
+                        break
                 break
 
 if __name__ == "__main__":
