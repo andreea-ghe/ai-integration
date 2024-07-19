@@ -46,6 +46,9 @@ jobs:
             echo "$file was changed"
           done
 
+      - name: Create Diffs Directory
+        run: mkdir -p diffs
+
       - name: Get File Diffs
         run: |
           changed_files="${{ steps.changed-files.outputs.all_changed_files }}"
