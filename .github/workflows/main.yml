@@ -78,56 +78,30 @@ jobs:
       - name: Add Code Suggestions Comments
         run: |
           commit_id=${{ env.commit_id }}
-          reviews=$(cat reviews.txt)
-          IFS=$'\n' read -r -d '' -a lines <<< "$reviews"
-          file=""
-          review=""
-          for line in "${lines[@]}"; do
-            if [[ "$line" == "FILE:"* ]]; then
-              if [[ ! -z "$file" ]]; then
-                diff_file="diffs/$file.diff"
-                if [ -f "$diff_file" ]; then
-                  diff_hunk=$(awk '/^@@/ {print; exit}' "$diff_file")
-                  position=$(awk '/^@@/ {print NR+1; exit}' "$diff_file")
-                  echo "Posting review for $file at position $position"
-                  echo "Commit ID: $commit_id"
-                  echo "Diff hunk: $diff_hunk"
-                  echo "Review: $review"
-                  curl -s -L \
-                    -X POST \
-                    -H "Accept: application/vnd.github+json" \
-                    -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-                    -H "X-GitHub-Api-Version: 2022-11-28" \
-                    https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.number }}/comments \
-                    -d "$(jq -n --arg body "$review" --arg path "$file" --argjson position $position --arg commit_id "$commit_id" --arg diff_hunk "$diff_hunk" '{body: $body, path: $path, position: $position, commit_id: $commit_id, diff_hunk: $diff_hunk}')"
-                fi
+          file_names=()
+          reviews=()
+          
+          # Read from the file reviews.txt
+          while IFS= read -r line; do
+              if [[ $line == "FILE: "* ]]; then
+                  file_names+=("${line#FILE: }")
+              elif [[ $line == "REVIEW: "* ]]; then
+                  review=""
+                  while IFS= read -r review_line; do
+                      [[ $review_line == "ENDREVIEW" ]] && break
+                      review+="$review_line"$'\n'
+                  done
+                  reviews+=("$review")
               fi
-              file=$(echo "$line" | cut -d' ' -f2)
-              review=""
-            elif [[ "$line" == "REVIEW:"* ]]; then
-              review=$(echo "$line" | cut -d' ' -f2-)
-            elif [[ "$line" == "ENDREVIEW" ]]; then
-              if [[ ! -z "$file" ]]; then
-                diff_file="diffs/$file.diff"
-                if [ -f "$diff_file" ]; then
-                  diff_hunk=$(awk '/^@@/ {print; exit}' "$diff_file")
-                  position=$(awk '/^@@/ {print NR+1; exit}' "$diff_file")
-                  echo "Posting review for $file at position $position"
-                  echo "Commit ID: $commit_id"
-                  echo "Diff hunk: $diff_hunk"
-                  echo "Review: $review"
-                  curl -s -L \
-                    -X POST \
-                    -H "Accept: application/vnd.github+json" \
-                    -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-                    -H "X-GitHub-Api-Version: 2022-11-28" \
-                    https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.number }}/comments \
-                    -d "$(jq -n --arg body "$review" --arg path "$file" --argjson position $position --arg commit_id "$commit_id" --arg diff_hunk "$diff_hunk" '{body: $body, path: $path, position: $position, commit_id: $commit_id, diff_hunk: $diff_hunk}')"
-                fi
-              fi
-              file=""
-              review=""
-            else
-              review="$review\n$line"
-            fi
+          done < reviews.txt
+          
+          # Display the results
+          echo "File Names:"
+          for file in "${file_names[@]}"; do
+              echo "$file"
+          done
+          
+          echo "Reviews:"
+          for review in "${reviews[@]}"; do
+              echo "$review"
           done
