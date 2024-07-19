@@ -67,7 +67,6 @@ jobs:
       - name: Run Python Script
         run: |
           changed_files="${{ steps.changed-files.outputs.all_changed_files }}"
-          echo "Running chatbot.py with files: $changed_files"
           python3 chatbot.py "$changed_files"
           cat reviews.txt
 
@@ -96,7 +95,6 @@ jobs:
           done < reviews.txt
           
           for review in "${reviews[@]}"; do
-              echo $review
               escaped_comments=$(echo $review | jq -s -R -r @json)
               curl -s -L \
               -X POST \
