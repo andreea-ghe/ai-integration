@@ -109,16 +109,17 @@ def post_review_comments(pr, review_results, commit):
             if file.filename == file_name:
                 file_diff = file.patch
                 diff_lines = file_diff.splitlines()
+                position = 1  # Position in the diff
                 for index, diff_line in enumerate(diff_lines):
                     if diff_line.startswith('+') and not diff_line.startswith('+++'):
                         pr.create_review_comment(
                             body=review,
-                            commit=commit,
+                            commit_id=commit.sha,
                             path=file_name,
-                            line=index + 1  # Line number in the file
+                            position=position  # Position in the diff
                         )
                         break
-                break
+                    position += 1  # Increment position in the diff
 
 if __name__ == "__main__":
     changed_files = list(pr.get_files())
