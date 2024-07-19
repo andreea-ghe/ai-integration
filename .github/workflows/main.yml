@@ -96,7 +96,7 @@ jobs:
           done < reviews.txt
           
           for review in "${reviews[@]}"; do
-              escaped_comments=$(echo $review | jq -s -R -r @json)
+              escaped_comments=$(echo "$review" | jq -Rs '.' | jq -r)
               curl -s -L \
               -X POST \
               -H "Accept: application/vnd.github+json" \
@@ -105,4 +105,3 @@ jobs:
               https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.number }}/comments \
               -d "{\"body\":$escaped_comments}"
           done
-        
