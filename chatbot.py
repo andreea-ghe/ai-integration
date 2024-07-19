@@ -32,7 +32,6 @@ def generate_feedback(diff):
 
     response = completion(
     model="ollama/llama3",
-    # model="gpt-4", 
     messages=[
             {"role": "system", "content": system_message},
             {"role": "user", "content": f"Please review the following code changes and provide feedback:\n\n{diff}"}
@@ -47,12 +46,8 @@ def review_code_diffs(diffs):
     for file_name, diff in diffs.items():
         # Perform code review and return the result
         answer = generate_feedback(diff)
-        review_results.append({
-            "file_name": file_name,
-            "diff": diff,
-            "review": answer
-        })
-    return review_results
+        review_results.append(f"FILE: {file_name}\nREVIEW: {answer}\nENDREVIEW")
+    return "\n".join(review_results)
 
 def get_file_diffs(file_list):
     diffs = {}
@@ -72,7 +67,4 @@ if __name__ == "__main__":
     files = sys.argv[1]
     file_diffs = get_file_diffs(files)
     result = review_code_diffs(file_diffs)
-    
-    # Print the result in a format that can be parsed by the GitHub Action
-    for item in result:
-        print(f"::set-output name={item['file_name']}::{item['review']}")
+    print(result)
