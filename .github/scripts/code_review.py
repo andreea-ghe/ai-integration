@@ -114,7 +114,7 @@ def post_review_comments(pr, review_results, commit):
                     if diff_line.startswith('+') and not diff_line.startswith('+++'):
                         pr.create_review_comment(
                             body=review,
-                            commit_id=commit.sha,
+                            commit=commit,
                             path=file_name,
                             position=position  # Position in the diff
                         )
