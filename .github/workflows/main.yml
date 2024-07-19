@@ -106,11 +106,11 @@ jobs:
               escaped_comments=$(echo $review | jq -s -R -r @json)
               echo $review
               curl -s -L \
-                -X POST \
-                -H "Accept: application/vnd.github+json" \
-                -H "Authorization: ***" \
-                -H "X-GitHub-Api-Version: 2022-11-28" \
-                https://api.github.com/repos/andreea-ghe/ai-integration/issues/44/comments \
-                -d "{\"body\":$escaped_comments}"
+              -X POST \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer ${{ secrets.MY_GITHUB_TOKEN }}" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.number }}/comments \
+              -d "{\"body\":$escaped_comments}"
           done
         
