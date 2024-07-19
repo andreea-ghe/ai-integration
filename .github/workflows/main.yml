@@ -107,8 +107,8 @@ jobs:
             review=$(echo $line | cut -d= -f2-)
             diff_file="diffs/$file.diff"
             if [ -f "$diff_file" ]; then
-              diff_hunk=$(grep -A 5 "^diff --git" "$diff_file" | grep -v "^diff --git" | grep -v "^index" | grep -v "^---" | grep -v "^+++" | grep -v "^@@" | head -n 1)
-              position=$(grep -n "^+" "$diff_file" | head -n 1 | cut -d: -f1)
+              diff_hunk=$(awk '/^@@/ {print; exit}' "$diff_file")
+              position=$(awk '/^@@/ {print NR+1; exit}' "$diff_file")
               echo "Posting review for $file at position $position"
               curl -s -L \
                 -X POST \
