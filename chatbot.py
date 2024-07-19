@@ -25,11 +25,10 @@ def generate_feedback(diff):
 
         Code changes:
         
-        {diff}
+{diff}
 
 
         Your review:"""
-
 
     response = completion(
     model="ollama/llama3",
@@ -43,7 +42,6 @@ def generate_feedback(diff):
 
     return response['choices'][0]['message']['content']
 
- 
 def review_code_diffs(diffs):
     review_results = []
     for file_name, diff in diffs.items():
@@ -55,11 +53,11 @@ def review_code_diffs(diffs):
 def get_file_diffs(file_list):
     diffs = {}
     for file_name in file_list.split():
-        with open(file_name, 'r') as file:
-            code = file.read()
-        # For simplicity, let's assume the diff is the entire file content.
-        # You will need to actually get the diff using a library or command.
-        diffs[file_name] = code  # Replace with actual diff fetching
+        diff_file = f"diffs/{file_name}.diff"
+        if os.path.exists(diff_file):
+            with open(diff_file, 'r') as file:
+                diff = file.read()
+            diffs[file_name] = diff
     return diffs
 
 if __name__ == "__main__":
