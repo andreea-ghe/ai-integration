@@ -27,7 +27,6 @@ def generate_feedback(diff):
         
 {diff}
 
-
         Your review:"""
 
     response = completion(
@@ -44,7 +43,6 @@ def generate_feedback(diff):
 def review_code_diffs(diffs):
     review_results = []
     for file_name, diff in diffs.items():
-        # Perform code review and return the result
         answer = generate_feedback(diff)
         review_results.append(f"FILE: {file_name}\nREVIEW: {answer}\nENDREVIEW")
     return "\n".join(review_results)
@@ -67,4 +65,5 @@ if __name__ == "__main__":
     files = sys.argv[1]
     file_diffs = get_file_diffs(files)
     result = review_code_diffs(file_diffs)
-    print(result)
+    with open('script_output.txt', 'w') as output_file:
+        output_file.write(result)
