@@ -96,6 +96,7 @@ jobs:
           done < reviews.txt
           
           for review in "${reviews[@]}"; do
+              echo $review
               escaped_comments=$(echo $review | jq -s -R -r @json)
               curl -s -L \
               -X POST \
