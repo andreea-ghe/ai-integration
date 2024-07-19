@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # Fetch all history for all branches
 
       - name: Install Ollama
         run: |
@@ -35,6 +37,10 @@ jobs:
         run: |
           python3 -m pip install --upgrade pip
           pip install litellm openai python-dotenv
+
+      - name: Fetch Base Branch
+        run: |
+          git fetch origin main:main
 
       - name: Get Changed Files
         id: changed-files
