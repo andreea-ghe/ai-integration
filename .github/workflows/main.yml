@@ -15,28 +15,19 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install Ollama
+      - name: Install Dependencies
         run: |
+          sudo apt-get update
+          sudo apt-get install -y curl jq
           curl -fsSL https://ollama.com/install.sh | sudo -E sh
-
-      - name: Start Ollama Service
-        run: |
           nohup ollama serve &
-
           sleep 5
           curl -i http://localhost:11434
-
-      - name: Pull Llama3 Model
-        run: |
-          ollama pull llama3
-
-      - name: Install Python Dependencies
-        run: |
           python3 -m pip install --upgrade pip
           pip install litellm openai python-dotenv
 
       - name: Fetch Base Branch
-        run: git fetch origin main:main
+        run: git fetch origin main
 
       - name: Get Changed Files
         id: changed-files
@@ -58,6 +49,13 @@ jobs:
           for file in $changed_files; do
             git diff origin/main -- $file > diffs/$file.diff
           done
+
+      - name: Run Python Script
+        run: |
+          changed_files="${{ steps.changed-files.outputs.all_changed_files }}"
+          echo "Running chatbot.py with files: $changed_files"
+          python3 chatbot.py "$changed_files"
+          cat script_output.txt
 
       - name: Parse and Output Reviews
         id: parse-output
@@ -92,7 +90,7 @@ jobs:
               curl -s -L \
                 -X POST \
                 -H "Accept: application/vnd.github+json" \
-                -H "Authorization: Bearer ${{ secrets.MY_GITHUB_TOKEN }}" \
+                -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
                 -H "X-GitHub-Api-Version: 2022-11-28" \
                 https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.number }}/comments \
                 -d "$(jq -n --arg body "$review" --arg path "$file" --argjson line $line_number --arg commit_id "$commit_id" '{body: $body, path: $path, line: $line, commit_id: $commit_id}')"
