@@ -10,14 +10,16 @@ load_dotenv()
 token = os.getenv('GITHUB_TOKEN')
 repo_name = os.getenv('GITHUB_REPOSITORY')
 pr_number = os.getenv('PR_NUMBER')
+commit_sha = os.getenv('COMMIT_SHA')
 
 print(f"GITHUB_TOKEN is set: {'Yes' if token else 'No'}")
 print(f"GITHUB_REPOSITORY: {repo_name}")
 print(f"PR_NUMBER: {pr_number}")
+print(f"COMMIT_SHA: {commit_sha}")
 
 # Check if the environment variables are correctly set
-if token is None or repo_name is None or pr_number is None:
-    raise ValueError("GITHUB_TOKEN, GITHUB_REPOSITORY, or PR_NUMBER is not set.")
+if token is None or repo_name is None or pr_number is None or commit_sha is None:
+    raise ValueError("GITHUB_TOKEN, GITHUB_REPOSITORY, PR_NUMBER, or COMMIT_SHA is not set.")
 
 g = Github(token)
 
@@ -93,21 +95,25 @@ def review_code(files):
         review_results.append((file_name, answer))
     return review_results
 
-def post_review_comments(review_results):
+def post_review_comments(pr, review_results, commit_sha):
     for file_name, review in review_results:
         # Fetch the file from the PR to get the patch (diff) details
         for file in pr.get_files():
             if file.filename == file_name:
                 file_diff = file.patch
                 diff_lines = file_diff.splitlines()
-                for diff_line in diff_lines:
+                for index, diff_line in enumerate(diff_lines):
                     if diff_line.startswith('+') and not diff_line.startswith('+++'):
-                        line_number = diff_lines.index(diff_line) + 1
-                        pr.create_review_comment(body=review, path=file_name, position=line_number)
+                        pr.create_review_comment(
+                            body=review,
+                            commit=commit_sha,
+                            path=file_name,
+                            line=index + 1  # Line number in the file
+                        )
                         break
                 break
 
 if __name__ == "__main__":
     changed_files = list(pr.get_files())
     review_results = review_code(changed_files)
-    post_review_comments(review_results)
+    post_review_comments(pr, review_results, commit_sha)
