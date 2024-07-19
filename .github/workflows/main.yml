@@ -104,6 +104,7 @@ jobs:
           echo "Reviews:"
           for review in "${reviews[@]}"; do
               escaped_comments=$(echo $review | jq -s -R -r @json)
+              echo $review
               curl -s -L \
                 -X POST \
                 -H "Accept: application/vnd.github+json" \
