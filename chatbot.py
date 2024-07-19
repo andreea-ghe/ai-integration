@@ -64,5 +64,5 @@ if __name__ == "__main__":
     files = sys.argv[1]
     file_diffs = get_file_diffs(files)
     result = review_code_diffs(file_diffs)
-    with open('script_output.txt', 'w') as output_file:
+    with open('reviews.txt', 'w') as output_file:
         output_file.write(result)
