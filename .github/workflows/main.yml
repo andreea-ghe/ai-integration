@@ -69,7 +69,7 @@ jobs:
           changed_files="${{ steps.changed-files.outputs.all_changed_files }}"
           echo "Running chatbot.py with files: $changed_files"
           python3 chatbot.py "$changed_files"
-          cat script_output.txt
+          cat reviews.txt
 
       - name: Get Latest Commit ID
         id: get_commit
