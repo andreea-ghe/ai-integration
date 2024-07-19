@@ -96,7 +96,7 @@ jobs:
           done < reviews.txt
           
           for review in "${reviews[@]}"; do
-              escaped_comments=$(echo "$review" | jq -Rs '.' | jq -r)
+              escaped_comments=$(echo "$review")
               curl -s -L \
               -X POST \
               -H "Accept: application/vnd.github+json" \
