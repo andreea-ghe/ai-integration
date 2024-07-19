@@ -6,7 +6,7 @@ from litellm import completion
 
 def generate_feedback(code):
     """Generate feedback using OpenAI GPT model."""
-        system_message = f"""\
+    system_message = f"""\
         Please review the code below and identify any syntax or logical errors, suggest
         ways to refactor and improve code quality, enhance performance, address security
         concerns, and align with best practices. Provide specific examples for each area
