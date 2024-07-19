@@ -46,6 +46,14 @@ jobs:
             echo "$file was changed"
           done
 
+      - name: Get File Diffs
+        run: |
+          changed_files="${{ steps.changed-files.outputs.all_changed_files }}"
+          echo "Generating diffs for: $changed_files"
+          for file in $changed_files; do
+            git diff origin/main -- $file > diffs/$file.diff
+          done
+
       - name: Run Python Script
         run: |
           changed_files="${{ steps.changed-files.outputs.all_changed_files }}"
