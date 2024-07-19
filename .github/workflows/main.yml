@@ -74,7 +74,11 @@ jobs:
           review=""
           while IFS= read -r line; do
             if [[ "$line" == "FILE:"* ]]; then
+              if [[ ! -z "$file" ]]; then
+                reviews="$reviews\n$file=$review"
+              fi
               file=$(echo $line | cut -d' ' -f2)
+              review=""
             elif [[ "$line" == "REVIEW:"* ]]; then
               review=$(echo $line | cut -d' ' -f2-)
             elif [[ "$line" == "ENDREVIEW" ]]; then
@@ -85,6 +89,9 @@ jobs:
               review="$review\n$line"
             fi
           done < script_output.txt
+          if [[ ! -z "$file" ]]; then
+            reviews="$reviews\n$file=$review"
+          fi
           echo -e "$reviews" > reviews.txt
           cat reviews.txt
 
