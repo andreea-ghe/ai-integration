@@ -56,11 +56,13 @@ jobs:
           changed_files="${{ steps.changed-files.outputs.all_changed_files }}"
           echo "Generating diffs for: $changed_files"
           for file in $changed_files; do
-            if git diff origin/main -- $file > diffs/$file.diff; then
+            dir_name=$(dirname "$file")
+            mkdir -p "diffs/$dir_name"
+            if git diff origin/main -- "$file" > "diffs/$file.diff"; then
               echo "Diff for $file generated successfully."
             else
               echo "No diff generated for $file. Skipping."
-              rm -f diffs/$file.diff
+              rm -f "diffs/$file.diff"
             fi
           done
 
@@ -116,4 +118,3 @@ jobs:
                 > aux.txt
             fi
           done < reviews.txt
-          
