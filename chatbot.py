@@ -45,10 +45,9 @@ Code changes:
 Your review:"""
 
     response = completion(
-        model="ollama/llama3",
+        model="ollama/codellama",
         messages=[
             {"role": "system", "content": system_message},
-            {"role": "user", "content": f"Please review the following code changes and provide feedback:\n\n{diff}"}
         ],
         api_base="http://localhost:11434"
     )
