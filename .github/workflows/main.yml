@@ -28,7 +28,7 @@ jobs:
 
       - name: Pull Llama3 Model
         run: |
-          ollama pull codellama
+          ollama pull llama3
 
       - name: Install Python Dependencies
         run: |
