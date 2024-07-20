@@ -128,7 +128,7 @@ jobs:
                 file_path="${file_names[-1]}"
                 
                 hunk_lines=$(awk '/@@ [^@]* @@/ { found = 1; next } found { print }' <<< "$diff")
-                echo "$file_path"
+                echo "$hunk_lines" > file_hunk_lines.txt
                 line_number=0
                 while IFS= read -r diff_line; do
                   ((line_number++))
@@ -143,7 +143,7 @@ jobs:
                     line=$((new_start_line + line_number - 1))
                     start_side="RIGHT"
                   fi
-                done <<< "$hunk_lines"
+                done < file_hunk_lines.txt
 
                 echo "$file_path"
 
