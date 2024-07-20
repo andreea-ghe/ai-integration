@@ -106,7 +106,7 @@ jobs:
                 https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.number }}/comments \
                 -d "{\"body\":$escaped_comments}"
                 
-                >> aux.txt
+                > aux.txt
             fi
           done < reviews.txt
           
