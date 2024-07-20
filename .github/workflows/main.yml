@@ -83,6 +83,12 @@ jobs:
           while IFS= read -r line; do
             if [[ $line == "FILE: "* ]]; then
                 file_names+=("${line#FILE: }")
+            elif [[ $line == "DIFF: "* ]]; then
+              diff=""
+              while IFS= read -r diff_line; do
+                  [[ $diff_line == "ENDDIFF" ]] && break
+                  diff+="$diff_line"$'\n'
+              done
             elif [[ $line == "REVIEW: "* ]]; then
                 review=""
                 while IFS= read -r review_line; do
@@ -92,6 +98,7 @@ jobs:
         
                 # Write the file name and review to aux.txt
                 echo "${file_names[-1]}" > aux.txt
+                echo -e "$diff" >> aux.txt
                 echo -e "$review" >> aux.txt
         
                 # Display the content of aux.txt
