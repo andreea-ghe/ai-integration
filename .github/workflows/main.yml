@@ -102,13 +102,12 @@ jobs:
         
                 # Write the file name and review to aux.txt
                 echo "${file_names[-1]}" > aux.txt
-                echo "${file_names[-1]}"
                 echo -e "$diff" >> aux.txt
                 echo -e "$review" >> aux.txt
         
                 # Display the content of aux.txt
                 cat aux.txt
-
+                echo "${file_names[-1]}"
                 # Parse diff
                 hunk_header=$(grep -o '@@ [^@]* @@' <<< "$diff")
                 if [[ $hunk_header =~ @@\ -([0-9]+),([0-9]+)\ \+([0-9]+),([0-9]+)\ @@ ]]; then
