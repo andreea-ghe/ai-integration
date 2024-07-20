@@ -128,6 +128,7 @@ jobs:
 
                 # Get the first character of the hunk content
                 first_char=$(echo "$hunk_content" | head -n 1 | cut -c 2)
+                echo $(echo "$hunk_content" | head -n 1)
                 echo $first_char
                 if [[ "$first_char" == "-" ]]; then
                   side="LEFT"
