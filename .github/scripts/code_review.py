@@ -6,6 +6,7 @@ from github import Github
 # Load environment variables
 load_dotenv()
 
+print("yayyaya")
 # Initialize GitHub client
 token = os.getenv('GITHUB_TOKEN')
 repo_name = os.getenv('GITHUB_REPOSITORY')
