@@ -45,7 +45,7 @@ Code changes:
 Your review:"""
 
     response = completion(
-        model="ollama/codellama",
+        model="ollama/llama3",
         messages=[
             {"role": "system", "content": system_message},
         ],
