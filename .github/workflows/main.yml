@@ -138,12 +138,8 @@ jobs:
                     start_side="RIGHT"
                   fi
                 done <<< "$hunk_lines"
-                
-                echo $start_line
-                echo $start_side
-                echo $line
-                echo $side
-                echo ${file_names[-1]}
+
+                echo "${file_names[-1]}"
 
                 escaped_comments=$(echo "$(cat aux.txt)" | jq -s -R -r @json)
                 curl -s -L \
