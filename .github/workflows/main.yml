@@ -127,7 +127,7 @@ jobs:
                 hunk_content=$(echo "$diff" | awk '/@@/ {getline; while ($0 ~ /^ / || $0 ~ /^-/ || $0 ~ /^\+/) {print; getline}}')
 
                 # Get the first character of the hunk content
-                first_char=$(echo "$hunk_content" | head -n 1 | cut -c 1)
+                first_char=$(echo "$hunk_content" | head -n 1 | cut -c 2)
                 echo $first_char
                 if [[ "$first_char" == "-" ]]; then
                   side="LEFT"
@@ -141,10 +141,7 @@ jobs:
                   start_side="RIGHT"
                 fi
 
-                echo $side
-                echo $start_line, $line, $start_side
-                echo "${file_names[-1]}"
-                echo "yayyaya"
+                echo $side, $start_line, $line, $start_side, "${file_names[-1]}"
 
                 escaped_comments=$(echo "$(cat aux.txt)" | jq -s -R -r @json)
                 curl -s -L \
