@@ -82,20 +82,27 @@ jobs:
   
           # Read from the file reviews.txt
           while IFS= read -r line; do
-              if [[ $line == "FILE: "* ]]; then
-                  file_names+=("${line#FILE: }")
-              elif [[ $line == "REVIEW: "* ]]; then
-                  review=""
-                  while IFS= read -r review_line; do
-                      [[ $review_line == "ENDREVIEW" ]] && break
-                      review+="$review_line"$'\n'
-                  done
-                  reviews+=("$review")
-              fi
+            if [[ $line == "FILE: "* ]]; then
+                file_names+=("${line#FILE: }")
+            elif [[ $line == "REVIEW: "* ]]; then
+                review=""
+                while IFS= read -r review_line; do
+                    [[ $review_line == "ENDREVIEW" ]] && break
+                    review+="$review_line"$'\n'
+                done
+                reviews+=("$review")
+        
+                # Write the file name and review to aux.txt
+                echo "${file_names[-1]}" > aux.txt
+                echo -e "$review" >> aux.txt
+        
+                # Display the content of aux.txt
+                cat aux.txt
+            fi
           done < reviews.txt
           
           for review in "${reviews[@]}"; do
-              escaped_comments=$(printf %s $review | jq -s -R -r @json)
+              escaped_comments=$(echo $review | jq -s -R -r @json)
               curl -s -L \
               -X POST \
               -H "Accept: application/vnd.github+json" \
