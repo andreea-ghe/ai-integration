@@ -99,14 +99,12 @@ jobs:
                 done
         
                 # Write the file name and review to aux.txt
-                echo "${file_names[-1]}" > aux.txt
+                echo "${file_names[-1]}" >> aux.txt
                 echo -e "$diff" >> aux.txt
                 echo -e "$review" >> aux.txt
         
                 # Display the content of aux.txt
                 cat aux.txt
-
-                echo "${file_names[-1]}"
 
                 # Parse diff
                 hunk_header=$(grep -o '@@ [^@]* @@' <<< "$diff")
@@ -123,8 +121,6 @@ jobs:
                   echo "Failed to parse hunk header"
                   exit 1
                 fi
-
-                echo "${file_names[-1]}"
     
                 hunk_lines=$(awk '/@@ [^@]* @@/ { found = 1; next } found { print }' <<< "$diff")
                 line_number=0
