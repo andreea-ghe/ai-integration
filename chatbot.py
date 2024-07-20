@@ -8,7 +8,7 @@ load_dotenv()
 def generate_feedback(diff):
     """Generate feedback using OpenAI GPT model."""
     system_message = f"""\
-I will provide for you the differences between the initial and the final code. 
+I will provide for you the differences extracted with a github function between the initial and the final code. 
 Please review the code below and identify any syntax or logical errors, suggest
 ways to refactor and improve code quality, enhance performance, address security
 concerns, and align with best practices. Provide specific examples for each area
