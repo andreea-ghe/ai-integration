@@ -123,12 +123,10 @@ jobs:
                   echo "Failed to parse hunk header"
                   exit 1
                 fi
-                
-                # I'm going to set this path here because further down is not recognized
-                file_path="${file_names[-1]}"
-                
+                                
                 hunk_lines=$(awk '/@@ [^@]* @@/ { found = 1; next } found { print }' <<< "$diff")
                 echo "$hunk_lines" > file_hunk_lines.txt
+                cat file_hunk_lines.txt
                 line_number=0
                 while IFS= read -r diff_line; do
                   ((line_number++))
@@ -147,7 +145,7 @@ jobs:
 
                 echo $side
                 echo $start_line, $line, $start_side
-                echo "$file_path"
+                echo "${file_names[-1]}"
                 echo "yayyaya"
 
                 escaped_comments=$(echo "$(cat aux.txt)" | jq -s -R -r @json)
