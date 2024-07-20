@@ -123,12 +123,9 @@ jobs:
                   echo "Failed to parse hunk header"
                   exit 1
                 fi
-                                
-                hunk_content=$(echo "$diff" | awk '/@@/ {getline; while ($0 ~ /^ / || $0 ~ /^-/ || $0 ~ /^\+/) {print; getline}}')
-
-                # Get the first character of the hunk content
-                first_char=$(echo "$hunk_content" | head -n 1 | cut -c 2)
-                echo $(echo "$hunk_content" | head -n 1)
+                
+                # Get the first character of the hunk content                
+                first_char=$(echo "$diff" | grep -o '@@ [^@]* @@' | sed 's/@@ //; s/ @@//' | cut -c 1)
                 echo $first_char
                 if [[ "$first_char" == "-" ]]; then
                   side="LEFT"
