@@ -124,24 +124,22 @@ jobs:
                   exit 1
                 fi
                                 
-                hunk_lines=$(awk '/@@ [^@]* @@/ { found = 1; next } found { print }' <<< "$diff")
-                echo "$hunk_lines" > file_hunk_lines.txt
-                cat file_hunk_lines.txt
-                line_number=0
-                while IFS= read -r diff_line; do
-                  ((line_number++))
-                  if [[ $diff_line == -* ]]; then
-                    side="LEFT"
-                    start_line=$original_start_line
-                    line=$((original_start_line + line_number - 1))
-                    start_side="LEFT"
-                  elif [[ $diff_line == +* ]]; then
-                    side="RIGHT"
-                    start_line=$new_start_line
-                    line=$((new_start_line + line_number - 1))
-                    start_side="RIGHT"
-                  fi
-                done < file_hunk_lines.txt
+                hunk_content=$(echo "$diff" | awk '/@@/ {getline; while ($0 ~ /^ / || $0 ~ /^-/ || $0 ~ /^\+/) {print; getline}}')
+
+                # Get the first character of the hunk content
+                first_char=$(echo "$hunk_content" | head -n 1 | cut -c 1)
+                echo $first_char
+                if [[ "$first_char" == "-" ]]; then
+                  side="LEFT"
+                  start_line=$original_start_line
+                  line=$((original_start_line + line_number - 1))
+                  start_side="LEFT"
+                elif [[ "$first_char" == "+" ]]; then
+                  side="RIGHT"
+                  start_line=$new_start_line
+                  line=$((new_start_line + line_number - 1))
+                  start_side="RIGHT"
+                fi
 
                 echo $side
                 echo $start_line, $line, $start_side
