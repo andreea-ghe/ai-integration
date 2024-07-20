@@ -145,6 +145,7 @@ jobs:
                   fi
                 done < file_hunk_lines.txt
 
+                echo $side, $start_line, $line, $start_side
                 echo "$file_path"
 
                 escaped_comments=$(echo "$(cat aux.txt)" | jq -s -R -r @json)
