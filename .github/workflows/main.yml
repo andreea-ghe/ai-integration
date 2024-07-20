@@ -124,7 +124,7 @@ jobs:
     
                 hunk_lines=$(awk '/@@ [^@]* @@/ { found = 1; next } found { print }' <<< "$diff")
                 line_number=0
-                echo "yaaay"
+                echo $hunk_lines
                 while IFS= read -r diff_line; do
                   ((line_number++))
                   if [[ $diff_line == -* ]]; then
