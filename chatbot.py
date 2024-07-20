@@ -59,7 +59,7 @@ def review_code_diffs(diffs):
     for file_name, diff in diffs.items():
         print("The differences are:\n", diff)
         answer = generate_feedback(diff)
-        review_results.append(f"FILE: {file_name}\nREVIEW: {answer}\nENDREVIEW")
+        review_results.append(f"FILE: {file_name}\nDIFF: {diff}\nENDDIFF\nREVIEW: {answer}\nENDREVIEW")
     return "\n".join(review_results)
 
 def get_file_diffs(file_list):
@@ -82,3 +82,4 @@ if __name__ == "__main__":
     result = review_code_diffs(file_diffs)
     with open('reviews.txt', 'w') as output_file:
         output_file.write(result)
+this 
