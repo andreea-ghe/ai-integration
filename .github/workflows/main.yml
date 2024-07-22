@@ -36,6 +36,7 @@ jobs:
         run: |
           mkdir -p ${{ env.OLLAMA_INSTALL_DIR }}
           curl -fsSL https://ollama.com/install.sh | sudo -E sh -s -- --install-dir ${{ env.OLLAMA_INSTALL_DIR }}
+          if [ -L /usr/local/bin/ollama ]; then sudo rm /usr/local/bin/ollama; fi
           sudo ln -s ${{ env.OLLAMA_INSTALL_DIR }}/ollama /usr/local/bin/ollama
 
       - name: Cache Ollama Model
