@@ -8,6 +8,8 @@ on:
     - cron: '0 0 * * 0' # This runs the workflow every week. Adjust the cron as necessary.
 
 env:
+  OLLAMA_INSTALL_DIR: ./ollama/bin # Adjusted path for GitHub Actions environment
+  OLLAMA_MODEL_DIR: ./ollama/models
   OLLAMA_VERSION_FILE: ollama-version.txt
 
 jobs:
@@ -24,9 +26,7 @@ jobs:
         id: cache-ollama-install
         uses: actions/cache@v3
         with:
-          path: |
-            /usr/local/bin/ollama
-            /usr/local/bin/ollama-install
+          path: ${{ env.OLLAMA_INSTALL_DIR }}
           key: ${{ runner.os }}-ollama-install-${{ hashFiles(env.OLLAMA_VERSION_FILE) }}
           restore-keys: |
             ${{ runner.os }}-ollama-install-
@@ -34,31 +34,31 @@ jobs:
       - name: Install Ollama
         if: steps.cache-ollama-install.outputs.cache-hit != 'true'
         run: |
-          curl -fsSL https://ollama.com/install.sh | sudo -E sh
+          mkdir -p ${{ env.OLLAMA_INSTALL_DIR }}
+          curl -fsSL https://ollama.com/install.sh | sudo -E sh -s -- --install-dir ${{ env.OLLAMA_INSTALL_DIR }}
+          sudo ln -s ${{ env.OLLAMA_INSTALL_DIR }}/ollama /usr/local/bin/ollama
 
       - name: Cache Ollama Model
         id: cache-ollama-model
         uses: actions/cache@v3
         with:
-          path: |
-            ~/.ollama/models
-            ~/.ollama/models-install
+          path: ${{ env.OLLAMA_MODEL_DIR }}
           key: ${{ runner.os }}-ollama-model-${{ hashFiles(env.OLLAMA_VERSION_FILE) }}
           restore-keys: |
             ${{ runner.os }}-ollama-model-
 
       - name: Start Ollama Service
         run: |
-          nohup ollama serve &
+          nohup ${{ env.OLLAMA_INSTALL_DIR }}/ollama serve &
           sleep 5
           curl -i http://localhost:11434
 
       - name: Pull Llama3 Model
         if: steps.cache-ollama-model.outputs.cache-hit != 'true'
         run: |
-          ollama pull llama3
+          ${{ env.OLLAMA_INSTALL_DIR }}/ollama pull llama3
           # Save a marker file indicating the model has been pulled
-          echo "model pulled" > ~/.ollama/models/.model-pulled
+          echo "model pulled" > ${{ env.OLLAMA_MODEL_DIR }}/.model-pulled
 
       - name: Cache Python Packages
         uses: actions/cache@v3
