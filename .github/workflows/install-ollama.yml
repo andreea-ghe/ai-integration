@@ -41,6 +41,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-ollama-model-
 
+      - name: List Home Directory Contents
+        run: |
+          ls -la ~/
+
+      - name: List Ollama Directory Contents
+        run: |
+          ls -la ~/.ollama
+
       - name: Pull Llama3 Model
         if: steps.cache-ollama-model.outputs.cache-hit != 'true'
         run: |
