@@ -15,6 +15,10 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install Ollama
+        run: |
+          curl -fsSL https://ollama.com/install.sh | sudo -E sh
+
       - name: Start Ollama Service
         run: |
           nohup ollama serve &
