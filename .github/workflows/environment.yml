@@ -1,12 +1,7 @@
 name: Setup Environment
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
   setup:
@@ -48,15 +43,3 @@ jobs:
         python3 -m pip install --upgrade pip
         pip install litellm openai python-dotenv
         pip freeze > requirements.txt
-
-    - name: Verify Python Dependencies
-      run: |
-        python3 -m pip show litellm
-        python3 -m pip show openai
-        python3 -m pip show python-dotenv
-
-    - name: Run Python Script
-      run: |
-        changed_files="${{ steps.changed-files.outputs.all_changed_files }}"
-        python3 chatbot.py "$changed_files"
-        cat reviews.txt
