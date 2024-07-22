@@ -37,6 +37,10 @@ jobs:
           mkdir -p ${{ env.OLLAMA_INSTALL_DIR }}
           curl -fsSL https://ollama.com/install.sh | sudo -E sh -s -- --install-dir ${{ env.OLLAMA_INSTALL_DIR }}
           export PATH="${{ env.OLLAMA_INSTALL_DIR }}:$PATH"
+        env:
+          OLLAMA_INSTALL_DIR: ${{ env.OLLAMA_INSTALL_DIR }}
+      - name: Add Ollama to PATH
+        run: echo "$OLLAMA_INSTALL_DIR" >> $GITHUB_PATH
 
       - name: Cache Ollama Model
         id: cache-ollama-model
