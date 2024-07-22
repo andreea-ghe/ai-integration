@@ -1,4 +1,4 @@
 litellm
 openai
 python-dotenv
-ollama==1.0.0 
+ollama
