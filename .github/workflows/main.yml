@@ -8,8 +8,8 @@ on:
     - cron: '0 0 * * 0' # This runs the workflow every week. Adjust the cron as necessary.
 
 env:
-  OLLAMA_INSTALL_DIR: ./ollama/bin # Adjusted path for GitHub Actions environment
-  OLLAMA_MODEL_DIR: ./ollama/models
+  OLLAMA_INSTALL_DIR: ./ollama-setup/bin # Adjusted path for GitHub Actions environment
+  OLLAMA_MODEL_DIR: ./ollama-setup/models
   OLLAMA_VERSION_FILE: ollama-version.txt
 
 jobs:
@@ -36,8 +36,7 @@ jobs:
         run: |
           mkdir -p ${{ env.OLLAMA_INSTALL_DIR }}
           curl -fsSL https://ollama.com/install.sh | sudo -E sh -s -- --install-dir ${{ env.OLLAMA_INSTALL_DIR }}
-          if [ -L /usr/local/bin/ollama ]; then sudo rm /usr/local/bin/ollama; fi
-          sudo ln -s ${{ env.OLLAMA_INSTALL_DIR }}/ollama /usr/local/bin/ollama
+          export PATH="${{ env.OLLAMA_INSTALL_DIR }}:$PATH"
 
       - name: Cache Ollama Model
         id: cache-ollama-model
