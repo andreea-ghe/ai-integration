@@ -28,7 +28,6 @@ jobs:
     - name: Start Ollama Service
       run: |
         nohup ollama serve &
-
         sleep 5
         curl -i http://localhost:11434
 
@@ -36,7 +35,28 @@ jobs:
       run: |
         ollama pull llama3
 
+    - name: Cache Python Dependencies
+      uses: actions/cache@v2
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
     - name: Install Python Dependencies
       run: |
         python3 -m pip install --upgrade pip
         pip install litellm openai python-dotenv
+        pip freeze > requirements.txt
+
+    - name: Verify Python Dependencies
+      run: |
+        python3 -m pip show litellm
+        python3 -m pip show openai
+        python3 -m pip show python-dotenv
+
+    - name: Run Python Script
+      run: |
+        changed_files="${{ steps.changed-files.outputs.all_changed_files }}"
+        python3 chatbot.py "$changed_files"
+        cat reviews.txt
