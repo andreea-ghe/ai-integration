@@ -47,6 +47,20 @@ jobs:
           python3 -m pip install --upgrade pip
           pip install litellm openai python-dotenv
 
+      - name: Cache Node Modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/yarn
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Install Node.js Dependencies
+        uses: actions/setup-node@v3.1.1
+        with:
+          node-version: v16.14.2
+        run: yarn install
+
       - name: Checkout Repository
         uses: actions/checkout@v2
         with:
