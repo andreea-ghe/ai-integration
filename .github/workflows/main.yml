@@ -50,8 +50,16 @@ jobs:
           sleep 5
           curl -i http://localhost:11434
 
+      - name: Verify Model Presence
+        id: verify-model
+        run: |
+          if [ ! -f ~/.ollama/models/llama3 ]; then
+            echo "Model not found"
+            exit 1
+          fi
+
       - name: Pull Llama3 Model
-        if: steps.cache-ollama.outputs.cache-hit != 'true'
+        if: steps.verify-model.outputs.exit-status != 0
         run: |
           ollama pull llama3
           
