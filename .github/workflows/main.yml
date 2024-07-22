@@ -1,18 +1,23 @@
-name: Install Ollama and Pull Model
+name: GPT Code Review
 
 on:
+  pull_request:
+    types: [opened, synchronize, reopened]
   workflow_dispatch:
-  schedule:
-    - cron: '0 0 * * 0' # This runs the workflow every week. Adjust the cron as necessary.
-
-env:
-  OLLAMA_INSTALL_DIR: /usr/local/bin/ollama # Adjust this path if necessary
-  OLLAMA_MODEL_DIR: ~/.ollama/models
-  OLLAMA_VERSION_FILE: ollama-version.txt
 
 jobs:
-  install_ollama:
+  trigger_install_ollama:
     runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Install Ollama and Pull Model Workflow
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: Install Ollama and Pull Model
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  code_review:
+    runs-on: ubuntu-latest
+    needs: trigger_install_ollama
 
     steps:
       - name: Checkout Repository
@@ -20,30 +25,138 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Cache Ollama Installation
+      - name: Start Ollama Service
+        run: |
+          nohup ollama serve &
+          sleep 5
+          curl -i http://localhost:11434
+
+      - name: Cache Python Packages
         uses: actions/cache@v3
         with:
-          path: ${{ env.OLLAMA_INSTALL_DIR }}
-          key: ${{ runner.os }}-ollama-install-${{ hashFiles(env.OLLAMA_VERSION_FILE) }}
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
-            ${{ runner.os }}-ollama-install-
+            ${{ runner.os }}-pip-
 
-      - name: Install Ollama
-        if: steps.cache-ollama-install.outputs.cache-hit != 'true'
+      - name: Install Dependencies
         run: |
-          curl -fsSL https://ollama.com/install.sh | sudo -E sh
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          
+      - name: Fetch Base Branch
+        run: git fetch origin main:main
 
-      - name: Cache Ollama Model
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.OLLAMA_MODEL_DIR }}
-          key: ${{ runner.os }}-ollama-model-${{ hashFiles(env.OLLAMA_VERSION_FILE) }}
-          restore-keys: |
-            ${{ runner.os }}-ollama-model-
+      - name: Get Changed Files
+        id: changed-files
+        uses: tj-actions/changed-files@v34
 
-      - name: Pull Llama3 Model
-        if: steps.cache-ollama-model.outputs.cache-hit != 'true'
+      - name: List All Changed Files
         run: |
-          ollama pull llama3
-          # Save a marker file indicating the model has been pulled
-          echo "model pulled" > ${{ env.OLLAMA_MODEL_DIR }}/.model-pulled
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            echo "$file was changed"
+          done
+
+      - name: Create Diffs Directory
+        run: mkdir -p diffs
+
+      - name: Get File Diffs
+        run: |
+          changed_files="${{ steps.changed-files.outputs.all_changed_files }}"
+          echo "Generating diffs for: $changed_files"
+          for file in $changed_files; do
+            dir_name=$(dirname "$file")
+            mkdir -p "diffs/$dir_name"
+            if git diff origin/main -- "$file" > "diffs/$file.diff"; then
+              echo "Diff for $file generated successfully."
+            else
+              echo "No diff generated for $file. Skipping."
+              rm -f "diffs/$file.diff"
+            fi
+          done
+
+      - name: Run Python Script
+        run: |
+          changed_files="${{ steps.changed-files.outputs.all_changed_files }}"
+          python3 chatbot.py "$changed_files"
+          cat reviews.txt
+
+      - name: Get Latest Commit ID
+        id: get_commit
+        run: echo "commit_id=$(git rev-parse HEAD)" >> $GITHUB_ENV
+
+      - name: Add Code Suggestions Comments
+        run: |
+          commit_id=${{ env.commit_id }}
+          file_names=()
+          diff=""
+          review=""
+
+          # Read from the file reviews.txt
+          while IFS= read -r line; do
+            if [[ $line == "FILE: "* ]]; then
+                file_names+=("${line#FILE: }")
+            elif [[ $line == "DIFF: "* ]]; then
+              diff=""
+              while IFS= read -r diff_line; do
+                  [[ $diff_line == "ENDDIFF" ]] && break
+                  diff+="$diff_line"$'\n'
+              done
+            elif [[ $line == "REVIEW: "* ]]; then
+                review=""
+                while IFS= read -r review_line; do
+                    [[ $review_line == "ENDREVIEW" ]] && break
+                    review+="$review_line"$'\n'
+                done
+
+                # Write the file name and review to aux.txt
+                echo "${file_names[-1]}" > aux.txt
+                echo -e "$diff" >> aux.txt
+                echo -e "$review" >> aux.txt
+
+                # Display the content of aux.txt
+                cat aux.txt
+
+                # Parse diff
+                hunk_header=$(grep -o '@@ [^@]* @@' <<< "$diff")
+                if [[ $hunk_header =~ @@\ -([0-9]+),([0-9]+)\ \+([0-9]+),([0-9]+)\ @@ ]]; then
+                  original_start_line="${BASH_REMATCH[1]}"
+                  original_line_count="${BASH_REMATCH[2]}"
+                  new_start_line="${BASH_REMATCH[3]}"
+                  new_line_count="${BASH_REMATCH[4]}"
+                  echo "Original Start Line: $original_start_line"
+                  echo "Original Line Count: $original_line_count"
+                  echo "New Start Line: $new_start_line"
+                  echo "New Line Count: $new_line_count"
+                else
+                  echo "Failed to parse hunk header"
+                  exit 1
+                fi
+
+                # Get the first character of the hunk content                
+                first_char=$(echo "$diff" | grep -o '@@ [^@]* @@' | sed 's/@@ //; s/ @@//' | cut -c 1)
+                echo $first_char
+                if [[ "$first_char" == "-" ]]; then
+                  side="LEFT"
+                  start_line=$original_start_line
+                  start_side="LEFT"
+                elif [[ "$first_char" == "+" ]]; then
+                  side="RIGHT"
+                  start_line=$new_start_line
+                  start_side="RIGHT"
+                fi
+
+                echo $side, $start_line, $start_side, "${file_names[-1]}"
+
+                escaped_comments=$(echo "$(cat aux.txt)" | jq -s -R -r @json)
+                curl -s -L \
+                -X POST \
+                -H "Accept: application/vnd.github+json" \
+                -H "Authorization: Bearer ${{ secrets.MY_GITHUB_TOKEN }}" \
+                -H "X-GitHub-Api-Version: 2022-11-28" \
+                https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.number }}/comments \
+                -d "{\"body\":$escaped_comments, \"commit_id\":\"$commit_id\", \"path\":\"${file_names[-1]}\", \"line\":$start_line, \"side\":\"$side\"}"
+
+                > aux.txt
+            fi
+          done < reviews.txt
