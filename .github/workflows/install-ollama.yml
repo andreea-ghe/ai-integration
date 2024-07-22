@@ -1,0 +1,49 @@
+name: Install Ollama and Pull Model
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * 0' # This runs the workflow every week. Adjust the cron as necessary.
+
+env:
+  OLLAMA_INSTALL_DIR: /usr/local/bin/ollama # Adjust this path if necessary
+  OLLAMA_MODEL_DIR: ~/.ollama/models
+  OLLAMA_VERSION_FILE: ollama-version.txt
+
+jobs:
+  install_ollama:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Cache Ollama Installation
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.OLLAMA_INSTALL_DIR }}
+          key: ${{ runner.os }}-ollama-install-${{ hashFiles(env.OLLAMA_VERSION_FILE) }}
+          restore-keys: |
+            ${{ runner.os }}-ollama-install-
+
+      - name: Install Ollama
+        if: steps.cache-ollama-install.outputs.cache-hit != 'true'
+        run: |
+          curl -fsSL https://ollama.com/install.sh | sudo -E sh
+
+      - name: Cache Ollama Model
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.OLLAMA_MODEL_DIR }}
+          key: ${{ runner.os }}-ollama-model-${{ hashFiles(env.OLLAMA_VERSION_FILE) }}
+          restore-keys: |
+            ${{ runner.os }}-ollama-model-
+
+      - name: Pull Llama3 Model
+        if: steps.cache-ollama-model.outputs.cache-hit != 'true'
+        run: |
+          ollama pull llama3
+          # Save a marker file indicating the model has been pulled
+          echo "model pulled" > ${{ env.OLLAMA_MODEL_DIR }}/.model-pulled
