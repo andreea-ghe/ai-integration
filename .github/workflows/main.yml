@@ -50,7 +50,17 @@ jobs:
           sleep 5
           curl -i http://localhost:11434
 
+      - name: Cache Llama3 Model
+        id: cache-model
+        uses: actions/cache@v3
+        with:
+          path: ~/.ollama/models/llama3
+          key: llama3-model-${{ hashFiles('ollama-version.txt') }}-${{ hashFiles('model-name.txt') }}
+          restore-keys: |
+            llama3-model-
+
       - name: Pull Llama3 Model
+        if: steps.cache-model.outputs.cache-hit != 'true'
         run: |
           ollama pull llama3
           
