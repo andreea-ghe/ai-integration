@@ -10,6 +10,9 @@ async function postCommentToGitHub(escaped_comments, commit_id, file_path, start
     owner: owner,
     repo: repo,
     pull_number: process.env.GITHUB_EVENT_NUMBER,
+    commit_id: commit_id,
+    line: start_line,
+    path: file_path,
     body: escaped_comments,
     headers: {
       'X-GitHub-Api-Version': '2022-11-28'
