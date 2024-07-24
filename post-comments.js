@@ -1,9 +1,13 @@
 async function postCommentToGitHub(escaped_comments, commit_id, file_path, start_line, side) {
   const { Octokit } = await import('@octokit/core');
   const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
-  console.log(commit_id);
+  
   console.log(escaped_comments);
-
+  console.log(commit_id);
+  console.log(file_path);
+  console.log(start_line);
+  console.log(side);
+  
   const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
 
   const response = await octokit.request('POST /repos/{owner}/{repo}/pulls/{pull_number}/comments', {
