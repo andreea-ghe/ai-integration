@@ -15,6 +15,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install Octokit
+        run: npm install @octokit/core
+
       - name: Add Code Suggestions Comments
         env:
           COMMIT_ID: ${{ env.commit_id }}
