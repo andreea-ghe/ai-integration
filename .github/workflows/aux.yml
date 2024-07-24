@@ -1,0 +1,26 @@
+name: Auxiliary
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+jobs:
+  code_review:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Add Code Suggestions Comments
+        env:
+          COMMIT_ID: ${{ env.commit_id }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_EVENT_NUMBER: ${{ github.event.number }}
+          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
+        run: |
+          commit_id=${{ env.commit_id }}
+          node post-comments.js "hello" "$commit_id" "goodbye.py" "1" "RIGHT"
