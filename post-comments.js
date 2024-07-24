@@ -1,6 +1,6 @@
-const { Octokit } = require("@octokit/rest");
-const fs = require("fs");
-const path = require("path");
+import { Octokit } from "@octokit/rest";
+import fs from "fs";
+import path from "path";
 
 async function postComments() {
   const token = process.env.GITHUB_TOKEN;
