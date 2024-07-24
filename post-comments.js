@@ -20,6 +20,8 @@ async function postCommentToGitHub(escaped_comments, commit_id, file_path, start
     }
   });
 
+  console.log(JSON.parse(response));
+  
   if (!response.ok) {
     throw new Error(`GitHub API responded with ${response.status}: ${response.statusText}`);
   }
