@@ -82,7 +82,6 @@ jobs:
 
       - name: Get File Diffs
         run: |
-          
           changed_files="${{ steps.changed-files.outputs.all_changed_files }}"
           echo "Generating diffs for: $changed_files"
           for file in $changed_files; do
@@ -106,8 +105,8 @@ jobs:
         id: get_commit
         run: echo "commit_id=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
-      - name: Install node-fetch
-        run: npm install node-fetch
+      - name: Install Octokit
+        run: npm install @octokit/core
 
       - name: Add Code Suggestions Comments
         env:
@@ -116,4 +115,70 @@ jobs:
           GITHUB_EVENT_NUMBER: ${{ github.event.number }}
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
         run: |
-          node post-comments.js
+          commit_id=${{ env.commit_id }}
+          file_names=()
+          diff=""
+          review=""
+
+          # Read from the file reviews.txt
+          while IFS= read -r line; do
+            if [[ $line == "FILE: "* ]]; then
+                file_names+=("${line#FILE: }")
+            elif [[ $line == "DIFF: "* ]]; then
+              diff=""
+              while IFS= read -r diff_line; do
+                  [[ $diff_line == "ENDDIFF" ]] && break
+                  diff+="$diff_line"$'\n'
+              done
+            elif [[ $line == "REVIEW: "* ]]; then
+                review=""
+                while IFS= read -r review_line; do
+                    [[ $review_line == "ENDREVIEW" ]] && break
+                    review+="$review_line"$'\n'
+                done
+
+                # Write the file name and review to aux.txt
+                echo "${file_names[-1]}" > aux.txt
+                echo -e "$diff" >> aux.txt
+                echo -e "$review" >> aux.txt
+
+                # Display the content of aux.txt
+                cat aux.txt
+
+                # Parse diff
+                hunk_header=$(grep -o '@@ [^@]* @@' <<< "$diff")
+                if [[ $hunk_header =~ @@\ -([0-9]+),([0-9]+)\ \+([0-9]+),([0-9]+)\ @@ ]]; then
+                  original_start_line="${BASH_REMATCH[1]}"
+                  original_line_count="${BASH_REMATCH[2]}"
+                  new_start_line="${BASH_REMATCH[3]}"
+                  new_line_count="${BASH_REMATCH[4]}"
+                  echo "Original Start Line: $original_start_line"
+                  echo "Original Line Count: $original_line_count"
+                  echo "New Start Line: $new_start_line"
+                  echo "New Line Count: $new_line_count"
+                else
+                  echo "Failed to parse hunk header"
+                  exit 1
+                fi
+
+                # Get the first character of the hunk content                
+                first_char=$(echo "$diff" | grep -o '@@ [^@]* @@' | sed 's/@@ //; s/ @@//' | cut -c 1)
+                echo $first_char
+                if [[ "$first_char" == "-" ]]; then
+                  side="LEFT"
+                  start_line=$original_start_line
+                  start_side="LEFT"
+                elif [[ "$first_char" == "+" ]]; then
+                  side="RIGHT"
+                  start_line=$new_start_line
+                  start_side="RIGHT"
+                fi
+
+                echo $side, $start_line, $start_side, "${file_names[-1]}"
+
+                escaped_comments=$(echo "$(cat aux.txt)" | jq -s -R -r @json)
+                node postComment.js "$escaped_comments" "$commit_id" "${file_names[-1]}" "$start_line" "$side"
+
+                > aux.txt
+            fi
+          done < reviews.txt
