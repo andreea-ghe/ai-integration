@@ -1,6 +1,5 @@
-import { Octokit } from '@octokit/core';
-
 async function postCommentToGitHub(escaped_comments, commit_id, file_path, start_line, side) {
+  const { Octokit } = await import('@octokit/core');
   const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
   
   console.log(escaped_comments);
