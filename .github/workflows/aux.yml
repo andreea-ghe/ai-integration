@@ -20,14 +20,14 @@ jobs:
 
       - name: Get Latest Commit ID
         id: get_commit
-        run: echo "commit_id=$(git rev-parse HEAD)" >> $GITHUB_ENV
+        run: echo "commit_id=${{ github.sha }}" >> $GITHUB_ENV
 
       - name: Add Code Suggestions Comments
         env:
-          COMMIT_ID: ${{ env.commit_id }}
+          COMMIT_ID: ${{ github.sha }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_EVENT_NUMBER: ${{ github.event.number }}
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
         run: |
-          commit_id=${{ env.commit_id }}
+          commit_id=${{ env.COMMIT_ID }}
           node post-comments.js "hello" "$commit_id" "goodbye.py" "1" "RIGHT"
