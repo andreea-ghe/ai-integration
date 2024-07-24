@@ -11,10 +11,10 @@ async function postCommentToGitHub(escaped_comments, commit_id, file_path, start
     body: escaped_comments,
     commit_id: commit_id,
     path: file_path,
-    start_line: start_line,
-    start_side: side,
-    line: start_line,
+    position: parseInt(start_line),
     side: side,
+    subject_type: 'line',
+    in_reply_to: null,
     headers: {
       'X-GitHub-Api-Version': '2022-11-28'
     }
