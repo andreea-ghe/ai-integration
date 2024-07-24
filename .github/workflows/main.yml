@@ -106,6 +106,9 @@ jobs:
         id: get_commit
         run: echo "commit_id=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
+      - name: Install node-fetch
+        run: npm install node-fetch
+
       - name: Add Code Suggestions Comments
         env:
           COMMIT_ID: ${{ env.commit_id }}
