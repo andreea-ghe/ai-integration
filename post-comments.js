@@ -1,8 +1,6 @@
-const { Octokit } = require("@octokit/core");
+import Octokit from "@octokit/core";
 
 async function postCommentToGitHub(escaped_comments, commit_id, file_path, start_line, side) {
-  console.log(process.env);
-  
   const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 
   const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
