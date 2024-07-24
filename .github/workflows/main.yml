@@ -107,7 +107,7 @@ jobs:
 
       - name: Add Code Suggestions Comments
         run: |
-          async function postCommentToGitHub(escaped_comments, commit_id, file_path, start_line, side) {
+         async function postCommentToGitHub(escaped_comments, commit_id, file_path, start_line, side) {
               const url = `https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.number }}/comments`;
               const body = {
                   body: escaped_comments,
@@ -131,7 +131,6 @@ jobs:
               const data = await response.json();
               return data;
           }
-
           commit_id=${{ env.commit_id }}
           file_names=()
           diff=""
@@ -139,60 +138,63 @@ jobs:
 
           # Read from the file reviews.txt
           while IFS= read -r line; do
-              if [[ $line == "FILE: "* ]]; then
-                  file_names+=("${line#FILE: }")
-              elif [[ $line == "DIFF: "* ]]; then
-                  diff=""
-                  while IFS= read -r diff_line; do
-                      [[ $diff_line == "ENDDIFF" ]] && break
-                      diff+="$diff_line"$'\n'
-                  done
-              elif [[ $line == "REVIEW: "* ]]; then
-                  review=""
-                  while IFS= read -r review_line; do
-                      [[ $review_line == "ENDREVIEW" ]] && break
-                      review+="$review_line"$'\n'
-                  done
+            if [[ $line == "FILE: "* ]]; then
+                file_names+=("${line#FILE: }")
+            elif [[ $line == "DIFF: "* ]]; then
+              diff=""
+              while IFS= read -r diff_line; do
+                  [[ $diff_line == "ENDDIFF" ]] && break
+                  diff+="$diff_line"$'\n'
+              done
+            elif [[ $line == "REVIEW: "* ]]; then
+                review=""
+                while IFS= read -r review_line; do
+                    [[ $review_line == "ENDREVIEW" ]] && break
+                    review+="$review_line"$'\n'
+                done
 
-                  # Write the file name and review to aux.txt
-                  echo "${file_names[-1]}" > aux.txt
-                  echo -e "$diff" >> aux.txt
-                  echo -e "$review" >> aux.txt
+                # Write the file name and review to aux.txt
+                echo "${file_names[-1]}" > aux.txt
+                echo -e "$diff" >> aux.txt
+                echo -e "$review" >> aux.txt
 
-                  # Display the content of aux.txt
-                  cat aux.txt
+                # Display the content of aux.txt
+                cat aux.txt
 
-                  # Parse diff
-                  hunk_header=$(grep -o '@@ [^@]* @@' <<< "$diff")
-                  if [[ $hunk_header =~ @@\ -([0-9]+),([0-9]+)\ \+([0-9]+),([0-9]+)\ @@ ]]; then
-                      original_start_line="${BASH_REMATCH[1]}"
-                      original_line_count="${BASH_REMATCH[2]}"
-                      new_start_line="${BASH_REMATCH[3]}"
-                      new_line_count="${BASH_REMATCH[4]}"
-                      echo "Original Start Line: $original_start_line"
-                      echo "Original Line Count: $original_line_count"
-                      echo "New Start Line: $new_start_line"
-                      echo "New Line Count: $new_line_count"
-                  else
-                      echo "Failed to parse hunk header"
-                      exit 1
-                  fi
+                # Parse diff
+                hunk_header=$(grep -o '@@ [^@]* @@' <<< "$diff")
+                if [[ $hunk_header =~ @@\ -([0-9]+),([0-9]+)\ \+([0-9]+),([0-9]+)\ @@ ]]; then
+                  original_start_line="${BASH_REMATCH[1]}"
+                  original_line_count="${BASH_REMATCH[2]}"
+                  new_start_line="${BASH_REMATCH[3]}"
+                  new_line_count="${BASH_REMATCH[4]}"
+                  echo "Original Start Line: $original_start_line"
+                  echo "Original Line Count: $original_line_count"
+                  echo "New Start Line: $new_start_line"
+                  echo "New Line Count: $new_line_count"
+                else
+                  echo "Failed to parse hunk header"
+                  exit 1
+                fi
 
-                  # Determine side and start line
-                  first_char=$(echo "$diff" | grep -o '@@ [^@]* @@' | sed 's/@@ //; s/ @@//' | cut -c 1)
-                  if [[ "$first_char" == "-" ]]; then
-                      side="LEFT"
-                      start_line=$original_start_line
-                  elif [[ "$first_char" == "+" ]]; then
-                      side="RIGHT"
-                      start_line=$new_start_line
-                  fi
+                # Get the first character of the hunk content                
+                first_char=$(echo "$diff" | grep -o '@@ [^@]* @@' | sed 's/@@ //; s/ @@//' | cut -c 1)
+                echo $first_char
+                if [[ "$first_char" == "-" ]]; then
+                  side="LEFT"
+                  start_line=$original_start_line
+                  start_side="LEFT"
+                elif [[ "$first_char" == "+" ]]; then
+                  side="RIGHT"
+                  start_line=$new_start_line
+                  start_side="RIGHT"
+                fi
 
-                  # Post comment to GitHub
-                  escaped_comments=$(echo "$(cat aux.txt)" | jq -s -R -r @json)
-                  node -e "const postCommentToGitHub = ${postCommentToGitHub.toString()}; postCommentToGitHub('$escaped_comments', '$commit_id', '${file_names[-1]}', $start_line, '$side').catch(console.error);"
+                echo $side, $start_line, $start_side, "${file_names[-1]}"
 
-                  # Clear aux.txt
-                  > aux.txt
-              fi
+                escaped_comments=$(echo "$(cat aux.txt)" | jq -s -R -r @json)
+                node -e "const postCommentToGitHub = ${postCommentToGitHub.toString()}; postCommentToGitHub('$escaped_comments', '$commit_id', '${file_names[-1]}', $start_line, '$side').catch(console.error);"
+
+                > aux.txt
+            fi
           done < reviews.txt
