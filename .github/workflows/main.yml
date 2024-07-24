@@ -176,6 +176,7 @@ jobs:
 
                 echo $side, $start_line, $start_side, "${file_names[-1]}"
 
+                echo $commit_id
                 escaped_comments=$(echo "$(cat aux.txt)" | jq -s -R -r @json)
                 node post-comments.js "$escaped_comments" "$commit_id" "${file_names[-1]}" "$start_line" "$side"
 
