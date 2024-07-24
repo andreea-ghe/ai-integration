@@ -82,6 +82,7 @@ jobs:
 
       - name: Get File Diffs
         run: |
+          
           changed_files="${{ steps.changed-files.outputs.all_changed_files }}"
           echo "Generating diffs for: $changed_files"
           for file in $changed_files; do
@@ -107,7 +108,7 @@ jobs:
 
       - name: Add Code Suggestions Comments
         run: |
-         async function postCommentToGitHub(escaped_comments, commit_id, file_path, start_line, side) {
+          async function postCommentToGitHub(escaped_comments, commit_id, file_path, start_line, side) {
               const url = `https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.number }}/comments`;
               const body = {
                   body: escaped_comments,
