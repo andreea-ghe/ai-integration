@@ -107,7 +107,6 @@ jobs:
         run: echo "commit_id=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
       - name: Add Code Suggestions Comments
-        name: Add Code Suggestions Comments
         env:
           COMMIT_ID: ${{ env.commit_id }}
           GITHUB_REPOSITORY: ${{ github.repository }}
