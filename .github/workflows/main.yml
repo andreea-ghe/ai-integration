@@ -113,4 +113,4 @@ jobs:
           GITHUB_EVENT_NUMBER: ${{ github.event.number }}
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
         run: |
-          node postComment.js
+          node post-comments.js
