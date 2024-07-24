@@ -2,6 +2,8 @@ async function postCommentToGitHub(escaped_comments, commit_id, file_path, start
   const { Octokit } = await import('@octokit/core');
   const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 
+  console.log(escaped_comments)
+
   const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
 
   const response = await octokit.request('POST /repos/{owner}/{repo}/pulls/{pull_number}/comments', {
@@ -19,8 +21,6 @@ async function postCommentToGitHub(escaped_comments, commit_id, file_path, start
       'X-GitHub-Api-Version': '2022-11-28'
     }
   });
-
-  console.log(JSON.parse(response));
   
   if (!response.ok) {
     throw new Error(`GitHub API responded with ${response.status}: ${response.statusText}`);
