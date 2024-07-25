@@ -10,7 +10,8 @@ async function postCommentToGitHub(comment_body, commit_id, file_path, start_lin
     const pull_number = process.env.GITHUB_EVENT_NUMBER;
 
     console.log('Repository Info:', { owner, repo, pull_number });
-
+    console.log(comment_body);
+    
     let response;
     if (start_line == line) {
       response = await octokit.request('POST /repos/{owner}/{repo}/pulls/{pull_number}/comments', {
