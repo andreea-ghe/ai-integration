@@ -66,6 +66,6 @@ jobs:
             if [ -f "$diff_file" ]; then
               echo "Posting comment for $file"
               comment_body=$(cat "$diff_file" | head -n 10) # Example: Use first 10 lines of diff as comment body
-              node post-comments.js "$comment_body" "${{ env.COMMIT_ID }}" "$file" "1" "1" "RIGHT"
+              node post-comments.js "$comment_body" "${{ env.COMMIT_ID }}" "$file" "1" "3" "RIGHT"
             fi
           done
