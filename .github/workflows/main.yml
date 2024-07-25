@@ -119,17 +119,7 @@ jobs:
           file_names=()
           diff=""
           review=""
-
-          format_comment() {
-            local diff="$1"
-            local review="$2"
-            echo "### Code Review\n\n"
-            echo "\`\`\`diff"
-            echo "$diff"
-            echo "\`\`\`\n\n"
-            echo "$review"
-          }
-
+ 
           # Read from the file reviews.txt
           while IFS= read -r line; do
             if [[ $line == "FILE: "* ]]; then
@@ -146,22 +136,25 @@ jobs:
                     [[ $review_line == "ENDREVIEW" ]] && break
                     review+="$review_line"$'\n'
                 done
+ 
+                # Write the file name and review to aux.txt
+                echo "${file_names[-1]}" > aux.txt
+                echo -e "$diff" >> aux.txt
+                echo -e "$review" >> aux.txt
+ 
+                # Display the content of aux.txt
+                cat aux.txt
 
-                # Format the comment
-                formatted_comment=$(format_comment "$diff" "$review")
+                escaped_comments=$(echo "$(cat aux.txt)" | jq -s -R -r @json)
 
-                escaped_comments=$(echo "$formatted_comment" | jq -s -R -r @json)
-
-                # Extract the necessary values using the Python script
                 parsed_values=$(python3 parse_diff.py <<< "$diff")
                 start_line=$(echo "$parsed_values" | awk '{print $1}')
                 line=$(echo "$parsed_values" | awk '{print $2}')
                 start_side=$(echo "$parsed_values" | awk '{print $3}')
                 side=$(echo "$parsed_values" | awk '{print $4}')
                 
-                node post-comments.js "$escaped_comments" "${{ github.event.pull_request.head.sha }}" "${file_names[-1]}" "$start_line" "$line" "$start_side" "$side"
+                node post-comments.js "$escaped_comments" "${{ github.event.pull_request.head.sha }}" "${file_names[-1]}" "$start_line" "$line" "$start_side" "side"
 
                 > aux.txt
             fi
           done < reviews.txt
-
