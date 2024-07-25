@@ -18,7 +18,7 @@ async function postCommentToGitHub(comment_body, commit_id, file_path, start_lin
       commit_id,
       path: file_path,
       body: comment_body,
-      position: parseInt(start_line, 10),
+      position: parseInt(start_line, 3),
     });
 
     if (response.status !== 201) {
