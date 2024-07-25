@@ -30,4 +30,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
         run: |
           commit_id=${{ env.COMMIT_ID }}
-          node post-comments.js "hello" "$commit_id" "goodbye.py" "1" "RIGHT"
+          
+          const [owner, repo] =  ${{ github.repository }}.split('/');
+          await github.rest.pulls.createReview({
+            owner: owner,
+            repo: repo,
+            pull_number:  ${{ github.event.number }}
+            commit_id: '${{ github.sha }}',
+            event: 'REQUEST_CHANGES',
+            comments: 'hello'
+          });
+          # node post-comments.js "hello" "$commit_id" "goodbye.py" "1" "RIGHT"
