@@ -150,6 +150,7 @@ export const robot = (app: Probot) => {
       );
 
       return 'success';
+      print("yayayayayyayayayyayayay")
     }
   );
 };
