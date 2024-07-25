@@ -64,7 +64,7 @@ if (args.length < 7) {
 const [comment_body, commit_id, file_path, start_line, line, start_side, side] = args;
 
 // Replace \n with actual newlines in the input argument
-const formatted_comment_body = comment_body.replace(/\\n/g, '\n');
+const formatted_comment_body = comment_body.replace(/\\n/g, '\n').replace(/\\t\+/g, '    ');
 
 postCommentToGitHub(formatted_comment_body, commit_id, file_path, start_line, line, start_side, side)
   .then(response => console.log('Comment posted successfully:', response))
