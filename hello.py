@@ -1,88 +1,72 @@
-import logging
-import logging.config
+# Merges two subarrays of array[].
+# First subarray is arr[left..mid]
+# Second subarray is arr[mid+1..right]
+def merge(array, left, mid, right):
+    subArrayOne = mid - left + 1
+    subArrayTwo = right - mid
 
-from semantic_kernel import Kernel
-from semantic_kernel.connectors.ai.hugging_face import (
-    HuggingFacePromptExecutionSettings,
-    HuggingFaceTextCompletion,
-)
-from semantic_kernel.connectors.ai.ollama import (
-    OllamaChatCompletion,
-    OllamaPromptExecutionSettings,
-)
-from semantic_kernel.connectors.ai.open_ai import (
-    OpenAIChatCompletion,
-    OpenAIChatPromptExecutionSettings,
-)
-from semantic_kernel.prompt_template import (  # noqa: F401
-    InputVariable,
-    PromptTemplateConfig,
-)
+    # Create temp arrays
+    leftArray = [0] * subArrayOne
+    rightArray = [0] * subArrayTwo
 
-print("hello andreea")
-print("hello world")
-print("hello")
+    # Copy data to temp arrays leftArray[] and rightArray[]
+    for i in range(subArrayOne):
+        leftArray[i] = array[left + i]
+    for j in range(subArrayTwo):
+        rightArray[j] = array[mid + 1 + j]
 
-from resumecentral.src.sem_kernel.service_settings import ServiceSettings
-from resumecentral.src.sem_kernel.services import Service
+    indexOfSubArrayOne = 0  # Initial index of first sub-array
+    indexOfSubArrayTwo = 0  # Initial index of second sub-array
+    indexOfMergedArray = left  # Initial index of merged array
 
+    # Merge the temp arrays back into array[left..right]
+    while indexOfSubArrayOne < subArrayOne and indexOfSubArrayTwo < subArrayTwo:
+        if leftArray[indexOfSubArrayOne] <= rightArray[indexOfSubArrayTwo]:
+            array[indexOfMergedArray] = leftArray[indexOfSubArrayOne]
+            indexOfSubArrayOne += 1
+        else:
+            array[indexOfMergedArray] = rightArray[indexOfSubArrayTwo]
+            indexOfSubArrayTwo += 1
+        indexOfMergedArray += 1
 
-def setup_logging():
-    # Setup a detailed logging format
-    logging.basicConfig(
-        format="[%(asctime)s - %(name)s:%(lineno)d - %(levelname)s] %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
-    )
+    # Copy the remaining elements of left[], if any
+    while indexOfSubArrayOne < subArrayOne:
+        array[indexOfMergedArray] = leftArray[indexOfSubArrayOne]
+        indexOfSubArrayOne += 1
+        indexOfMergedArray += 1
 
-    # Set the logging level for semantic_kernel.kernel to DEBUG
-    logging.getLogger("kernel").setLevel(logging.DEBUG)
+    # Copy the remaining elements of right[], if any
+    while indexOfSubArrayTwo < subArrayTwo:
+        array[indexOfMergedArray] = rightArray[indexOfSubArrayTwo]
+        indexOfSubArrayTwo += 1
+        indexOfMergedArray += 1
 
+# begin is for left index and end is right index
+# of the sub-array of arr to be sorted
+def mergeSort(array, begin, end):
+    if begin >= end:
+        return
 
-def initialize_kernel():
-    kernel = Kernel()
-    return kernel
+    mid = begin + (end - begin) // 2
+    mergeSort(array, begin, mid)
+    mergeSort(array, mid + 1, end)
+    merge(array, begin, mid, end)
 
+# Function to print an array
+def printArray(array, size):
+    for i in range(size):
+        print(array[i], end=" ")
+    print()
 
-def select_ai_service():
-    service_settings = ServiceSettings.create()
-    selectedService = (
-        Service.OpenAI
-        if service_settings.global_llm_service is None
-        else Service(service_settings.global_llm_service.lower())
-    )
-    return selectedService
+# Driver code
+if __name__ == "__main__":
+    arr = [12, 11, 13, 5, 6, 7]
+    arr_size = len(arr)
 
+    print("Given array is")
+    printArray(arr, arr_size)
 
-def configure_service(selectedService):
-    if selectedService == Service.OpenAI:
-        service = OpenAIChatCompletion(
-            ai_model_id="gpt-4o",
-            service_id="gpt-4o",
-        )
-        execution_settings = OpenAIChatPromptExecutionSettings(
-            service_id="gpt-4o",
-            ai_model_id="gpt-4o",
-            max_tokens=2000,
-            temperature=0.7,
-        )
-    elif selectedService == Service.Ollama:
-        service = OllamaChatCompletion(
-            service_id="llama3",
-            ai_model_id="llama3",
-            base_url="http://localhost:11434",
-        )
-        execution_settings = OllamaPromptExecutionSettings(
-            service_id="llama3",
-            ai_model_id="llama3",
-        )
-    elif selectedService == Service.HuggingFace:
-        service = HuggingFaceTextCompletion(
-            service_id="google/flan-t5-large",
-            ai_model_id="google/flan-t5-large",
-            task="text2text-generation",
-        )
-        execution_settings = HuggingFacePromptExecutionSettings(
-            service_id="meta-llama/Meta-Llama-3-8B",
-        )
+    mergeSort(arr, 0, arr_size - 1)
 
-    return service, execution_settings
+    print("\nSorted array is")
+    printArray(arr, arr_size)
