@@ -17,20 +17,20 @@ jobs:
 
       - name: Fetch Base Branch
         run: git fetch origin main:main
- 
+
       - name: Get Changed Files
         id: changed-files
         uses: tj-actions/changed-files@v34
- 
+
       - name: List All Changed Files
         run: |
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
             echo "$file was changed"
           done
- 
+
       - name: Create Diffs Directory
         run: mkdir -p diffs
- 
+
       - name: Get File Diffs
         run: |
           changed_files="${{ steps.changed-files.outputs.all_changed_files }}"
@@ -62,7 +62,10 @@ jobs:
         run: |
           changed_files="${{ steps.changed-files.outputs.all_changed_files }}"
           for file in $changed_files; do
-            dir_name=$(dirname "$file")
-            echo "$file", "$dir_name"
-            node post-comments.js "hello" "$commit_id" "$dir_name" "1" "RIGHT"
+            diff_file="diffs/$file.diff"
+            if [ -f "$diff_file" ]; then
+              echo "Posting comment for $file"
+              comment_body=$(cat "$diff_file" | head -n 10) # Example: Use first 10 lines of diff as comment body
+              node post-comments.js "$comment_body" "${{ env.COMMIT_ID }}" "$file" "1" "RIGHT"
+            fi
           done
