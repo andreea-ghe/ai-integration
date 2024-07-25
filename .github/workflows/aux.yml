@@ -29,4 +29,5 @@ jobs:
           GITHUB_EVENT_NUMBER: ${{ github.event.number }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          echo ${{ github.event.number }}
           node post-comments.js "hello" "$commit_id" "goodbye.py" "1" "RIGHT"
