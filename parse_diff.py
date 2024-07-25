@@ -4,7 +4,7 @@ import sys
 def parse_diff(diff):
     lines = diff.split('\n')
     start_line = None
-    current_line = None
+    current_line = 0
     start_side = 'RIGHT'
     side = 'RIGHT'
     changes = []
