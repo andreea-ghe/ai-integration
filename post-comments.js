@@ -10,21 +10,12 @@ async function postCommentToGitHub(escaped_comments, commit_id, file_path, start
   
   const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
 
-  const response = await octokit.request('POST /repos/{owner}/{repo}/pulls/{pull_number}/comments', {
-    owner,
-    repo,
-    pull_number: process.env.GITHUB_EVENT_NUMBER,
-    commit_id,
-    path: file_path,
-    body: escaped_comments,
-    side,
-    line: parseInt(start_line),
-    start_side: 'RIGHT', // Use 'RIGHT' for the default side
-    position: parseInt(start_line),
-    headers: {
-      'X-GitHub-Api-Version': '2022-11-28'
-    }
-  });
+  const response = await context.octokit.issues.createComment({
+        repo,,
+        owner,
+        issue_number: context.pullRequest().pull_number,
+        body: escaped_comments
+        });
 
   if (response.status !== 201) {
     throw new Error(`GitHub API responded with ${response.status}: ${response.statusText}`);
