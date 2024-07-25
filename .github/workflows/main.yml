@@ -147,10 +147,11 @@ jobs:
 
                 escaped_comments=$(echo "$(cat aux.txt)" | jq -s -R -r @json)
 
-                start_line=1
-                line=3
-                start_side="RIGHT"
-                side="RIGHT"
+                parsed_values=$(python3 parse_diff.py <<< "$diff")
+                start_line=$(echo "$parsed_values" | awk '{print $1}')
+                line=$(echo "$parsed_values" | awk '{print $2}')
+                start_side=$(echo "$parsed_values" | awk '{print $3}')
+                side=$(echo "$parsed_values" | awk '{print $4}')
                 
                 node post-comments.js "$escaped_comments" "${{ github.event.pull_request.head.sha }}" "${file_names[-1]}" "$start_line" "$line" "$start_side" "side"
 
