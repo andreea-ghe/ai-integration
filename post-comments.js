@@ -20,10 +20,10 @@ async function postCommentToGitHub(escaped_comments, commit_id, file_path, start
     pull_number,
     body: 'Great stuff!',
     commit_id: process.env.COMMIT_ID,
-    path: 'goodbye.txt',
+    path: 'hello.txt',
     start_line: 1,
     start_side: 'RIGHT',
-    line: 2,
+    line: 1,
     side: 'RIGHT',
     headers: {
       'X-GitHub-Api-Version': '2022-11-28'
