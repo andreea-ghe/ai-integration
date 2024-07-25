@@ -32,8 +32,6 @@ def parse_diff(diff):
         line = changes[-1][0]
         start_side = changes[0][1]
         side = changes[-1][1]
-        if start_line == line:
-            line += 1  # Ensure the end line is greater than the start line for multi-line comments
     else:
         start_line = line = 1
         start_side = side = 'RIGHT'
