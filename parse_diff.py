@@ -30,6 +30,8 @@ def parse_diff(diff):
     if changes:
         start_line = changes[0]
         line = changes[-1]
+        if start_line == line:
+            line += 1  # Ensure the end line is greater than the start line for multi-line comments
     else:
         start_line = line = 1
 
