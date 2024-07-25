@@ -5,14 +5,15 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-def generate_feedback(diff):
+def generate_feedback(diff, code_content):
     """Generate feedback using OpenAI GPT model."""
     system_message = f"""\
-I will provide for you the differences extracted with a github function between the initial and the final code. 
-Please review the code below and identify any syntax or logical errors, suggest
-ways to refactor and improve code quality, enhance performance, address security
-concerns, and align with best practices. Provide specific examples for each area
-and limit your recommendations to three per category.
+I will provide for you the differences extracted with a github function between
+the initial and the final code and also the initial code. Please review these 
+differences in the context of the initial code and identify any syntax or logical
+errors, suggest ways to refactor and improve code quality, enhance performance, 
+address security concerns, and align with best practices. Provide specific examples 
+for each area and limit your recommendations to three per category.
 
 Use the following response format, keeping the section headings as-is, and provide
 your feedback. Use bullet points for each response. The provided examples are for
@@ -42,6 +43,10 @@ Code changes:
         
 {diff}
 
+Full code:
+
+{code_content}
+
 Your review:"""
 
     response = completion(
@@ -54,12 +59,13 @@ Your review:"""
 
     return response['choices'][0]['message']['content']
 
-def review_code_diffs(diffs):
+def review_code_diffs(diffs, file_contents):
     review_results = []
     for file_name, diff in diffs.items():
         print("The differences are:\n", diff)
         if diff:
-            answer = generate_feedback(diff)
+            code_content = file_contents.get(file_name, "")
+            answer = generate_feedback(diff, code_content)
             review_results.append(f"FILE: {file_name}\nDIFF: {diff}\nENDDIFF\nREVIEW: {answer}\nENDREVIEW")
     return "\n".join(review_results)
 
@@ -73,6 +79,15 @@ def get_file_diffs(file_list):
             diffs[file_name] = diff
     return diffs
 
+def get_file_contents(file_list):
+    contents = {}
+    for file_name in file_list.split():
+        if os.path.exists(file_name):
+            with open(file_name, 'r') as file:
+                content = file.read()
+            contents[file_name] = content
+    return contents
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: python chatbot.py <file_names>")
@@ -80,6 +95,7 @@ if __name__ == "__main__":
     
     files = sys.argv[1]
     file_diffs = get_file_diffs(files)
-    result = review_code_diffs(file_diffs)
+    file_contents = get_file_contents(files)
+    result = review_code_diffs(file_diffs, file_contents)
     with open('reviews.txt', 'w') as output_file:
         output_file.write(result)
