@@ -51,11 +51,11 @@ jobs:
 
       - name: Get Latest Commit ID
         id: get_commit
-        run: echo "commit_id=${{ github.sha }}" >> $GITHUB_ENV
+        run: echo "commit_id=${{ github.event.pull_request.head.sha }}" >> $GITHUB_ENV
 
       - name: Add Code Suggestions Comments
         env:
-          COMMIT_ID: ${{ github.sha }}
+          COMMIT_ID: ${{ github.event.pull_request.head.sha }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_EVENT_NUMBER: ${{ github.event.number }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
