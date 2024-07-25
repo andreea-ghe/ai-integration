@@ -5,8 +5,8 @@ def parse_diff(diff):
     lines = diff.split('\n')
     start_line = None
     current_line = None
-    start_side = 'RIGHT'
-    side = 'RIGHT'
+    start_side = None
+    side = None
     changes = []
     
     # Regular expression to match the chunk header
@@ -22,18 +22,21 @@ def parse_diff(diff):
         
         if current_line is not None:
             if diff_line.startswith('+') and not diff_line.startswith('+++'):
-                changes.append(current_line)
+                changes.append((current_line, 'RIGHT'))
             elif diff_line.startswith('-') and not diff_line.startswith('---'):
-                changes.append(current_line)
+                changes.append((current_line, 'LEFT'))
             current_line += 1
 
     if changes:
-        start_line = changes[0]
-        line = changes[-1]
+        start_line = changes[0][0]
+        line = changes[-1][0]
+        start_side = changes[0][1]
+        side = changes[-1][1]
         if start_line == line:
             line += 1  # Ensure the end line is greater than the start line for multi-line comments
     else:
         start_line = line = 1
+        start_side = side = 'RIGHT'
 
     return start_line, line, start_side, side
 
