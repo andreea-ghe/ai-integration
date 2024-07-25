@@ -14,21 +14,15 @@ async function postCommentToGitHub(escaped_comments, commit_id, file_path, start
   console.log(owner);
   console.log(repo);
   
-  const response = await octokit.request('POST /repos/{owner}/{repo}/pulls/{pull_number}/comments', {
-    owner,
-    repo,
-    pull_number,
-    body: 'Great stuff!',
-    commit_id: process.env.COMMIT_ID,
-    path: 'hello.txt',
-    start_line: 1,
-    start_side: 'RIGHT',
-    line: 1,
-    side: 'RIGHT',
-    headers: {
-      'X-GitHub-Api-Version': '2022-11-28'
-    }
-  })
+  const response = await await process.octokit.pulls.createReviewComment({
+              repo,
+              owner,
+              pull_number,
+              commit_id: process.env.COMMIT_ID,
+              path: file_path,
+              body: escaped_comments,
+              position: start_line,
+            });
 
   if (response.status !== 201) {
     throw new Error(`GitHub API responded with ${response.status}: ${response.statusText}`);
