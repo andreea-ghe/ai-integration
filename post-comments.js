@@ -18,7 +18,7 @@ async function postCommentToGitHub(comment_body, commit_id, file_path, side) {
         commit_id,
         path: file_path,
         body: comment_body,
-        subject_type: file,
+        subject_type: 'file',
         side
       });
     
