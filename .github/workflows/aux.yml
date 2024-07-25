@@ -63,5 +63,5 @@ jobs:
           changed_files="${{ steps.changed-files.outputs.all_changed_files }}"
           for file in $changed_files; do
             dir_name=$(dirname "$file")
-            echo $file, $dir_name
-            node post-comments.js "hello" "$commit_id" "$file" "1" "RIGHT"
+            echo "$file", "$dir_name"
+            node post-comments.js "hello" "$commit_id" "$dir_name" "1" "RIGHT"
