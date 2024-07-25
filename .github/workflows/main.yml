@@ -137,8 +137,7 @@ jobs:
                     review+="$review_line"$'\n'
                 done
  
-                # Write the file name and review to aux.txt
-                echo "${file_names[-1]}" > aux.txt
+                # Write the review to aux.txt
                 echo -e "$review" >> aux.txt
  
                 # Display the content of aux.txt
