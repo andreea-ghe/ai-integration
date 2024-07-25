@@ -37,13 +37,13 @@ async function postCommentToGitHub(comment_body, commit_id, file_path, side) {
 
 const args = process.argv.slice(2);
 
-if (args.length < 5) {
-  console.error('Insufficient arguments. Expected: comment_body, commit_id, file_path, start_line, side');
+if (args.length < 4) {
+  console.error('Insufficient arguments. Expected: comment_body, commit_id, file_path, side');
   process.exit(1);
 }
 
-const [comment_body, commit_id, file_path, start_line, side] = args;
+const [comment_body, commit_id, file_path, side] = args;
 
-postCommentToGitHub(comment_body, commit_id, file_path, start_line, side)
+postCommentToGitHub(comment_body, commit_id, file_path, side)
   .then(response => console.log('Comment posted successfully:', response))
   .catch(error => console.error('Error posting comment:', error));
