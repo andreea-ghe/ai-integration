@@ -20,13 +20,12 @@ def parse_diff(diff):
             current_line = int(chunk_header_match.group(1))
             continue
         
-        if diff_line.startswith('+') and not diff_line.startswith('+++'):
-            if start_line is not None:
+        if current_line is not None:
+            if diff_line.startswith('+') and not diff_line.startswith('+++'):
                 changes.append(current_line)
-        if diff_line.startswith('-') and not diff_line.startswith('---'):
-            if start_line is not None:
+            elif diff_line.startswith('-') and not diff_line.startswith('---'):
                 changes.append(current_line)
-        current_line += 1
+            current_line += 1
 
     if changes:
         start_line = changes[0]
