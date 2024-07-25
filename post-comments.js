@@ -1,10 +1,10 @@
-async function postCommentToGitHub(comment_body, commit_id, file_path, start_line, side) {
+async function postCommentToGitHub(comment_body, commit_id, file_path, start_line, line, side) {
   const { Octokit } = await import('@octokit/core');
 
   try {
     const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 
-    console.log('Arguments:', { comment_body, commit_id, file_path, start_line, side });
+    console.log('Arguments:', { comment_body, commit_id, file_path, start_line, line, side });
 
     const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
     const pull_number = process.env.GITHUB_EVENT_NUMBER;
@@ -18,9 +18,9 @@ async function postCommentToGitHub(comment_body, commit_id, file_path, start_lin
       commit_id,
       path: file_path,
       body: comment_body,
-      start_line: parseInt(start_line, 10),
+      start_line,
       start_side: 'RIGHT',
-      line: parseInt(start_line, 10),
+      line: line,
       side: 'RIGHT'
     });
 
