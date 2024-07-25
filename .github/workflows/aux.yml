@@ -15,6 +15,37 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Fetch Base Branch
+        run: git fetch origin main:main
+ 
+      - name: Get Changed Files
+        id: changed-files
+        uses: tj-actions/changed-files@v34
+ 
+      - name: List All Changed Files
+        run: |
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            echo "$file was changed"
+          done
+ 
+      - name: Create Diffs Directory
+        run: mkdir -p diffs
+ 
+      - name: Get File Diffs
+        run: |
+          changed_files="${{ steps.changed-files.outputs.all_changed_files }}"
+          echo "Generating diffs for: $changed_files"
+          for file in $changed_files; do
+            dir_name=$(dirname "$file")
+            mkdir -p "diffs/$dir_name"
+            if git diff origin/main -- "$file" > "diffs/$file.diff"; then
+              echo "Diff for $file generated successfully."
+            else
+              echo "No diff generated for $file. Skipping."
+              rm -f "diffs/$file.diff"
+            fi
+          done
+
       - name: Install Octokit
         run: npm install @octokit/core
 
@@ -29,5 +60,8 @@ jobs:
           GITHUB_EVENT_NUMBER: ${{ github.event.number }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo ${{ github.event.number }}
-          node post-comments.js "hello" "$commit_id" "goodbye.py" "1" "RIGHT"
+          changed_files="${{ steps.changed-files.outputs.all_changed_files }}"
+          for file in $changed_files; do
+            dir_name=$(dirname "$file")
+            echo $file, $dir_name
+            node post-comments.js "hello" "$commit_id" "$file" "1" "RIGHT"
