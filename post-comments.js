@@ -4,6 +4,9 @@ async function postCommentToGitHub(comment_body, commit_id, file_path, start_lin
   try {
     const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 
+    // Replace \n with actual newlines
+    comment_body = comment_body.replace(/\\n/g, '\n');
+
     console.log('Arguments:', { comment_body, commit_id, file_path, start_line, line, start_side, side });
 
     const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
@@ -60,6 +63,9 @@ if (args.length < 7) {
 
 const [comment_body, commit_id, file_path, start_line, line, start_side, side] = args;
 
-postCommentToGitHub(comment_body, commit_id, file_path, start_line, line, start_side, side)
+// Replace \n with actual newlines in the input argument
+const formatted_comment_body = comment_body.replace(/\\n/g, '\n');
+
+postCommentToGitHub(formatted_comment_body, commit_id, file_path, start_line, line, start_side, side)
   .then(response => console.log('Comment posted successfully:', response))
   .catch(error => console.error('Error posting comment:', error));
