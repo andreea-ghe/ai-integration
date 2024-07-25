@@ -148,7 +148,6 @@ export const robot = (app: Probot) => {
         'successfully reviewed',
         context.payload.pull_request.html_url
       );
-      printf("yayayayayyayayayyayayay")
 
       return 'success';
     }
