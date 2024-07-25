@@ -11,18 +11,33 @@ async function postCommentToGitHub(comment_body, commit_id, file_path, start_lin
 
     console.log('Repository Info:', { owner, repo, pull_number });
 
-    const response = await octokit.request('POST /repos/{owner}/{repo}/pulls/{pull_number}/comments', {
-      owner,
-      repo,
-      pull_number,
-      commit_id,
-      path: file_path,
-      body: comment_body,
-      start_line: parseInt(start_line),
-      start_side,
-      line: parseInt(line),
-      side
-    });
+    let response;
+    if (start_line == line) {
+       response = await octokit.request('POST /repos/{owner}/{repo}/pulls/{pull_number}/comments', {
+        owner,
+        repo,
+        pull_number,
+        commit_id,
+        path: file_path,
+        body: comment_body,
+        line: parseInt(line),
+        side
+      });
+    }
+    else {
+      response = await octokit.request('POST /repos/{owner}/{repo}/pulls/{pull_number}/comments', {
+        owner,
+        repo,
+        pull_number,
+        commit_id,
+        path: file_path,
+        body: comment_body,
+        start_line: parseInt(start_line),
+        start_side,
+        line: parseInt(line),
+        side
+      });
+    }
 
     if (response.status !== 201) {
       throw new Error(`GitHub API responded with ${response.status}: ${response.statusText}`);
