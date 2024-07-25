@@ -14,7 +14,7 @@ async function postCommentToGitHub(escaped_comments, commit_id, file_path, start
   console.log(owner);
   console.log(repo);
   
-  const response = await process.octokit.pulls.createReviewComment({
+  const response = await octokit.pulls.createReviewComment({
               repo,
               owner,
               pull_number,
