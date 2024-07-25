@@ -20,8 +20,8 @@ async function postCommentToGitHub(comment_body, commit_id, file_path, start_lin
       body: comment_body,
       position: parseInt(start_line, 3),
       start_line: 1,
-      line: 2,
       start_side: 'RIGHT',
+      line: 2,
       side: 'RIGHT'
     });
 
