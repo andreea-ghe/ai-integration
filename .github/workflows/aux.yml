@@ -27,6 +27,6 @@ jobs:
           COMMIT_ID: ${{ github.sha }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_EVENT_NUMBER: ${{ github.event.number }}
-          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           node post-comments.js "hello" "$commit_id" "goodbye.py" "1" "RIGHT"
