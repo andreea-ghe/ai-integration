@@ -1,6 +1,3 @@
-# Merges two subarrays of array[].
-# First subarray is arr[left..mid]
-# Second subarray is arr[mid+1..right]
 def merge(array, left, mid, right):
     subArrayOne = mid - left + 1
     subArrayTwo = right - mid
@@ -15,9 +12,9 @@ def merge(array, left, mid, right):
     for j in range(subArrayTwo):
         rightArray[j] = array[mid + 1 + j]
 
-    indexOfSubArrayOne = 0  # Initial index of first sub-array
-    indexOfSubArrayTwo = 0  # Initial index of second sub-array
-    indexOfMergedArray = left  # Initial index of merged array
+    indexOfSubArrayOne = 0  
+    indexOfSubArrayTwo = 0  
+    indexOfMergedArray = left 
 
     # Merge the temp arrays back into array[left..right]
     while indexOfSubArrayOne < subArrayOne and indexOfSubArrayTwo < subArrayTwo:
@@ -57,16 +54,3 @@ def printArray(array, size):
     for i in range(size):
         print(array[i], end=" ")
     print()
-
-# Driver code
-if __name__ == "__main__":
-    arr = [12, 11, 13, 5, 6, 7]
-    arr_size = len(arr)
-
-    print("Given array is")
-    printArray(arr, arr_size)
-
-    mergeSort(arr, 0, arr_size - 1)
-
-    print("\nSorted array is")
-    printArray(arr, arr_size)
