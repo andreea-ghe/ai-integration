@@ -29,22 +29,4 @@ jobs:
           GITHUB_EVENT_NUMBER: ${{ github.event.number }}
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
         run: |
-          node -e "const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
-                   const { Octokit } = require('@octokit/core');
-                   const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
-                   (async () => {
-                     try {
-                       await octokit.request('POST /repos/{owner}/{repo}/pulls/{pull_number}/reviews', {
-                         owner,
-                         repo,
-                         pull_number: process.env.GITHUB_EVENT_NUMBER,
-                         commit_id: process.env.COMMIT_ID,
-                         event: 'REQUEST_CHANGES',
-                         body: 'hello'
-                       });
-                       console.log('Review created successfully');
-                     } catch (error) {
-                       console.error('Error creating review:', error);
-                     }
-                   })();"
-          # node post-comments.js "hello" "$commit_id" "goodbye.py" "1" "RIGHT"
+          node post-comments.js "hello" "$commit_id" "goodbye.py" "1" "RIGHT"
