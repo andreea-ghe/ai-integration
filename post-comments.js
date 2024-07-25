@@ -1,4 +1,4 @@
-async function postCommentToGitHub(comment_body, commit_id, file_path, start_line, line, start_side, side) {
+async function postCommentToGitHub(comment_body, commit_id, file_path, side) {
   const { Octokit } = await import('@octokit/core');
 
   try {
