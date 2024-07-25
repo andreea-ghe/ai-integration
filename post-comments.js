@@ -1,4 +1,4 @@
-async function postCommentToGitHub(comment_body, commit_id, file_path, start_line, line, side) {
+async function postCommentToGitHub(comment_body, commit_id, file_path, start_line, line, start_side, side) {
   const { Octokit } = await import('@octokit/core');
 
   try {
@@ -19,9 +19,9 @@ async function postCommentToGitHub(comment_body, commit_id, file_path, start_lin
       path: file_path,
       body: comment_body,
       start_line: parseInt(start_line),
-      start_side: 'RIGHT',
+      start_side,
       line: parseInt(line),
-      side: 'RIGHT'
+      side
     });
 
     if (response.status !== 201) {
