@@ -139,7 +139,6 @@ jobs:
  
                 # Write the file name and review to aux.txt
                 echo "${file_names[-1]}" > aux.txt
-                echo -e "$diff" >> aux.txt
                 echo -e "$review" >> aux.txt
  
                 # Display the content of aux.txt
