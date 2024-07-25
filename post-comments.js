@@ -4,7 +4,7 @@ async function postCommentToGitHub(comment_body, commit_id, file_path, start_lin
   try {
     const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 
-    comment_body = comment_body.replace(/\\n/g, '\n')..replace(/\\t\+/g, '    ');
+    comment_body = comment_body.replace(/\\n/g, '\n').replace(/\\t\+/g, '    ');
 
     console.log('Arguments:', { comment_body, commit_id, file_path, start_line, line, start_side, side });
 
