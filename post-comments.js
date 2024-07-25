@@ -10,10 +10,10 @@ async function postCommentToGitHub(escaped_comments, commit_id, file_path, start
   
   const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
 
-  const response = await context.octokit.issues.createComment({
+  const response = await octokit.issues.createComment({
         repo,
         owner,
-        issue_number: context.pullRequest().pull_number,
+        issue_number: pullRequest().pull_number,
         body: escaped_comments
         });
 
