@@ -4,7 +4,7 @@ async function postCommentToGitHub(comment_body, commit_id, file_path, side) {
   try {
     const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 
-    console.log('Arguments:', { comment_body, commit_id, file_path, start_line, line, start_side, side });
+    console.log('Arguments:', { comment_body, commit_id, file_path, side });
 
     const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
     const pull_number = process.env.GITHUB_EVENT_NUMBER;
