@@ -148,9 +148,9 @@ export const robot = (app: Probot) => {
         'successfully reviewed',
         context.payload.pull_request.html_url
       );
+      print("yayayayayyayayayyayayay")
 
       return 'success';
-      print("yayayayayyayayayyayayay")
     }
   );
 };
