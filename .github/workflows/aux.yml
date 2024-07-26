@@ -72,6 +72,7 @@ jobs:
               start_side=$(echo "$parsed_values" | awk '{print $3}')
               side=$(echo "$parsed_values" | awk '{print $4}')
               echo $start_line, $line, $start_side, $side
+              echo "$(cat $diff_file)"
               node post-comments.js "hello" "${{ env.COMMIT_ID }}" "$file" "$start_line" "$line" "$start_side" "$side"
             fi
           done
