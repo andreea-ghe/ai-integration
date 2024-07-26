@@ -36,7 +36,7 @@ def parse_diff(diff):
                 start_side = 'LEFT'
             side = 'LEFT'
 
-    return start_line_new, end_line_new, start_side, side
+    return min(start_line_old, start_line_new), min(end_line_old, end_line_new), start_side, side
 
 if __name__ == "__main__":
     diff = sys.stdin.read()
