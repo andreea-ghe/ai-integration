@@ -1,3 +1,3 @@
-print("goodbye andreea")
-print("goodbye world lala")
+print("goodbye")
+print("goodbye world)
 print("goodbye bye")
