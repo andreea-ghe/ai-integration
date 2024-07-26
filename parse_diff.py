@@ -21,9 +21,7 @@ def parse_diff(diff):
             continue
         
         if current_line is not None:
-            if diff_line.startswith('+') and not diff_line.startswith('+++'):
-                changes.append((current_line, 'RIGHT'))
-            elif diff_line.startswith('-') and not diff_line.startswith('---'):
+            if diff_line.startswith('-') and not diff_line.startswith('---'):
                 changes.append((current_line, 'LEFT'))
             current_line += 1
 
