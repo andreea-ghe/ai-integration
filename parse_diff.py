@@ -3,40 +3,40 @@ import sys
 
 def parse_diff(diff):
     lines = diff.split('\n')
-    start_line_old = None
-    end_line_old = None
-    start_line_new = None
-    end_line_new = None
+    start_line = None
+    current_line = None
     start_side = None
     side = None
-
-    # Regular expression to match the chunk header and capture a, b, c, d
-    chunk_header_re = re.compile(r'^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@')
+    changes = []
+    
+    # Regular expression to match the chunk header
+    chunk_header_re = re.compile(r'^@@ -\d+(?:,\d+)? \+(\d+)(?:,\d+)? @@')
 
     for i, diff_line in enumerate(lines):
         chunk_header_match = chunk_header_re.match(diff_line)
         if chunk_header_match:
-            a = int(chunk_header_match.group(1))
-            b = int(chunk_header_match.group(2)) if chunk_header_match.group(2) else 1
-            c = int(chunk_header_match.group(3))
-            d = int(chunk_header_match.group(4)) if chunk_header_match.group(4) else 1
-
-            start_line_old = a
-            end_line_old = a + b - 1
-            start_line_new = c
-            end_line_new = c + d - 1
+            if start_line is None:
+                start_line = int(chunk_header_match.group(1))
+            current_line = int(chunk_header_match.group(1))
             continue
         
-        if diff_line.startswith('+') and not diff_line.startswith('+++'):
-            if start_side is None:
-                start_side = 'RIGHT'
-            side = 'RIGHT'
-        elif diff_line.startswith('-') and not diff_line.startswith('---'):
-            if start_side is None:
-                start_side = 'LEFT'
-            side = 'LEFT'
+        if current_line is not None:
+            if diff_line.startswith('+') and not diff_line.startswith('+++'):
+                changes.append((current_line, 'RIGHT'))
+            elif diff_line.startswith('-') and not diff_line.startswith('---'):
+                changes.append((current_line, 'LEFT'))
+            current_line += 1
 
-    return start_line_old, end_line_old, start_side, side
+    if changes:
+        start_line = changes[0][0]
+        line = changes[-1][0]
+        start_side = changes[0][1]
+        side = changes[-1][1]
+    else:
+        start_line = line = 1
+        start_side = side = 'RIGHT'
+
+    return start_line, line, start_side, side
 
 if __name__ == "__main__":
     diff = sys.stdin.read()
