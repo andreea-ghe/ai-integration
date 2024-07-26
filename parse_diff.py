@@ -41,4 +41,4 @@ def parse_diff(diff):
 if __name__ == "__main__":
     diff = sys.stdin.read()
     start_line, line, start_side, side = parse_diff(diff)
-    print(f"{diff} {start_line} {line} {start_side} {side}")
+    print(f"{start_line} {line} {start_side} {side}")
