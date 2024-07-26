@@ -66,7 +66,7 @@ jobs:
             if [ -f "$diff_file" ]; then
               echo "Posting comment for $file"
               
-              parsed_values=$(python3 parse_diff.py <<< "$diff_file")
+              parsed_values=$(python3 parse_diff.py <<< "$(cat $diff_file)")
               start_line=$(echo "$parsed_values" | awk '{print $1}')
               line=$(echo "$parsed_values" | awk '{print $2}')
               start_side=$(echo "$parsed_values" | awk '{print $3}')
