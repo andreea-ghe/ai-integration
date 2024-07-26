@@ -65,7 +65,13 @@ jobs:
             diff_file="diffs/$file.diff"
             if [ -f "$diff_file" ]; then
               echo "Posting comment for $file"
-              comment_body='''Costel\nsparge pahare'''
-              node post-comments.js "$comment_body" "${{ env.COMMIT_ID }}" "$file" "1" "1" "RIGHT" "RIGHT"
+              
+              parsed_values=$(python3 parse_diff.py <<< "$diff_file")
+              start_line=$(echo "$parsed_values" | awk '{print $1}')
+              line=$(echo "$parsed_values" | awk '{print $2}')
+              start_side=$(echo "$parsed_values" | awk '{print $3}')
+              side=$(echo "$parsed_values" | awk '{print $4}')
+                
+              node post-comments.js "hello" "${{ env.COMMIT_ID }}" "$file" "$start_line" "$line" "$start_side" "$side"
             fi
           done
