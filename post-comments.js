@@ -12,7 +12,7 @@ async function postCommentToGitHub(comment_body, commit_id, file_path, start_lin
     const pull_number = process.env.GITHUB_EVENT_NUMBER;
 
     // console.log('Repository Info:', { owner, repo, pull_number });
-    console.log(String(comment_body));
+    console.log(comment_body);
 
     let response;
     if (start_line == line) {
@@ -22,7 +22,7 @@ async function postCommentToGitHub(comment_body, commit_id, file_path, start_lin
           pull_number,
           commit_id,
           path: file_path,
-          body: String(comment_body),
+          body: comment_body,
           line: parseInt(line),
           side
         });
