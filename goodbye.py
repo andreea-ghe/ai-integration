@@ -1,18 +1,41 @@
-from resumecentral.src.controllers.chroma_db import ChromaDatabaseController
-import os
-from dotenv import load_dotenv
-from langchain_core.documents import Document
-import asyncio
-from resumecentral.src.sem_kernel import kernel
-from semantic_kernel.contents import ChatHistory
-from semantic_kernel.functions import KernelArguments
-from resumecentral.src.controllers.chromadb import ChromaDatabaseController
-from langchain_core.documents import Document
-import shutil
-import os
+from typing import Any, Optional
 
-class AIController:
+from langchain_core.documents import Document
+from resumecentral.src.chroma.database import ChromaDatabase
+
+
+class ChromaDatabaseController:
+
+    
+        
+          
+    
+
+        
+        Expand All
+    
+    @@ -15,16 +14,16 @@ def __init__(self) -> None:
+  
     def __init__(self) -> None:
+        """
+        Initializes the ChromaDatabaseController instance, setting up an empty dictionary to store database configurations.
+        """
+        self.databases = {}
+    def create_database(
+        self,
+        name: str,
+        db_path: str,
+        chunk_size: int,
+        chunk_overlap: int,
+        collection: Optional[Any] = None,
+        collection_name: str = "chunk_collection",
+        embedding_model_name: str = "sentence-transformers/all-mpnet-base-v2",
+        embedding_model_kwargs: dict = {"device": "cpu"},
+        embedding_encode_kwargs: dict = {"normalize_embeddings": False},
+        documents: list[Document] = [],
+    ):
+        """
+        Creates a new ChromaDatabase instance with the specified parameters and adds it to the controller's database dictionary.
 
     
         
@@ -22,177 +45,69 @@ class AIController:
         
         Expand All
     
-    @@ -14,7 +18,6 @@ def similarity_search(query: str, chunk_size: int = 128):
+    @@ -49,20 +48,21 @@ def create_database(
   
-        pass
-    @staticmethod
-    def similarity_search(query: str, chunk_size: int = 128):
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        src = os.path.dirname(current_dir)
+        Parameters:
+            name (str): The name of the database configuration.
+            collection_name (str): The name of the default collection within the database.
+            db_path (str): The file system path to the database.
+            embedding_model_name (str): The name of the embedding model to use for document embeddings.
+            embedding_model_kwargs (dict): Additional keyword arguments for the embedding model.
+            embedding_encode_kwargs (dict): Additional keyword arguments for the embedding function.
+            chunk_size (int): The size of each text chunk.
+            chunk_overlap (int): The number of characters to overlap between chunks.
+            documents (list[Document]): A list of Document objects to be added to the retriever.
+        Returns:
+            The newly created ChromaDatabase instance.
+        Raises:
+            ValueError: If the database already exists in the databases dictinary.
+        """
+        if name in self.databases:
+            raise ValueError(f"A database with the name '{name}' already exists.")
 
+        chroma_db = ChromaDatabase(
+            db_path=db_path,
+            chunk_size=chunk_size,
+            chunk_overlap=chunk_overlap,
+            collection=collection,
+            collection_name=collection_name,
+            embedding_model_name=embedding_model_name,
+            embedding_model_kwargs=embedding_model_kwargs,
+            embedding_encode_kwargs=embedding_encode_kwargs,
+            documents=documents,
+        )
 
-        vectorstore_path = os.path.join(src, "chroma/vectorstore/")
-        cache_path = os.path.join(src, "chroma/__pycache__")
-        '''
-        if os.path.exists(cache_path):
-            shutil.rmtree(cache_path)
+        self.databases[name] = chroma_db
+        return chroma_db
+
+    def get_database(self, name: str):
+        """
+        Retrieves a ChromaDatabase instance by its configuration name.
 
     
-        
           
-    
-
-        
-        Expand All
-    
-    @@ -32,7 +35,6 @@ def similarity_search(query: str, chunk_size: int = 128):
-  
             
-        if os.path.exists(vectorstore_path):
-            shutil.rmtree(vectorstore_path)
-        '''
-        chromadb_controller = ChromaDatabaseController()
-        chromadb_name = "similarity_chromadb"
-        overlap = int(chunk_size / 5.0)
-        chromadb_controller.create_database(name=chromadb_name, db_path=vectorstore_path , chunk_size=chunk_size, chunk_overlap=overlap)
-        chromadb = chromadb_controller.get_database(name=chromadb_name)
-
-
-        # Aici incepe requestul de la interfata
-        resumes = chromadb.get_resumes_from_sqlite3_database()
-
-        pdf_documents = chromadb.load_resumes(resumes=resumes)
-
     
-        
+
           
+          Expand Down
     
-
-        
-        Expand All
     
-    @@ -44,14 +46,113 @@ def similarity_search(query: str, chunk_size: int = 128):
   
-        for document in pdf_documents:
-            content = document.page_content
-            cleaned_content = chromadb.clean_text(text=content)
-            document.page_content = cleaned_content
-
-        # This will populate both the vectorstore and the docstore
-        chromadb.parent_retriever.add_documents(documents=pdf_documents)
-
-        retrieved_docs = chromadb.parent_retriever.invoke(input=query, k_size=4)
-
-        for doc in retrieved_docs:
-           doc_score = str(doc.metadata.get("score"))
-           doc.metadata["score"] = doc_score
-
-        return([doc for doc in retrieved_docs if isinstance(doc, Document)])
-
-
-    @staticmethod
-    async def sort_retrieved_docs_by_experience(retrieved_docs):
-        # Get the variables from the .env file
-        load_dotenv()
-
-        kernel.setup_logging()
-        kernel_instance = kernel.initialize_kernel()
-        selected_service = kernel.select_ai_service()
-        print(f"Using service type: {selected_service}")
-
-        # Remove all services so that this cell can be re-run without restarting the kernel
-        kernel_instance.remove_all_services()
-
-        # Now configure the selected service
-        service, execution_settings = kernel.configure_service(selectedService=selected_service)
-
-        # Add that service to the kernel
-        kernel_instance.add_service(service=service)
-
-        prompt = """
-        PDF documents bot can look into documents and provide information about what's inside.
-        Chat history: {{$history}}
-        PDF documents: {{$user_input}}
-        Chatbot:
+        Parameters:
+            name (str): The name of the database configuration to retrieve.
+        Returns:
+            The ChromaDatabase instance if found, otherwise None.
         """
-
-        # Define a prompt template comfig with the PDF documents as input and chat history
-        # Chat history can be removed, but used for testing responses at the moment
-        prompt_template_config = kernel.PromptTemplateConfig(
-            name="sort documents",
-            template=prompt,
-            template_format="semantic-kernel",
-            input_variables=[
-                kernel.InputVariable(name="user_input", description="The PDF documents", isRequired=True),
-                kernel.InputVariable(name="history", description="The conversation history", is_required=True),
-            ],
-            execution_settings=execution_settings,
-        )
-
-        sorting_function = kernel_instance.add_function(
-            function_name="sortFunc",
-            plugin_name="sortPlugin",
-            prompt_template_config=prompt_template_config,
-        )
-
-        chat_history = ChatHistory()
-        chat_history.add_system_message(
+        return self.databases.get(name)
+    def delete_database(self, name: str) -> None:
         """
-            You are a helpful assistant. Your task is to look inside the metadata of the PDF documents given as input (which are CVs) and print
-        the ids sorted in descending order based on working experience of each candidate (the more years of experience a candidate has, the better). 
-        If any candidates does not provide any work experience years, just put them at the end. Education years should not be taken into account. 
-        Consider all the documents, if there are X as input, the output should be X sorted ids. To be more clear, you should return a list of ids.
-        
-            I will show you an example. Let's say that inside you have 3 PDF documents given as input. You see in the metadata and page_content 
-        the following:
-        Andrew (id 1) -> 3 years of experience
-        Sebastian (id 2) -> 6 years of experience
-        Mihai (id 3) -> 1 year of experience
-        Then you should print: 2, 1, 3
-            Consider that you will have different number of CVs, there won't be 3 all the times. You have to look at all, if you get 
-        an input of 10 PDF documents, then you should return a list of 10 ids.
-            You will print only one line representing the ids, no other words.
+        Deletes a database configuration from the controller.
+        Parameters:
+            name (str): The name of the database configuration to delete.
         """
-        )
-
-        arguments = KernelArguments(user_input=retrieved_docs, history=chat_history)
-        response = await kernel_instance.invoke(function=sorting_function, arguments=arguments)
-        chat_history.add_assistant_message(str(response))
-
-        if not isinstance(response, str):
-            response = str(response)
-
-        ids_by_experience_list = list(map(int, response.split(',')))
-
-        # Create a dictionary mapping document IDs to documents
-        doc_dict = {int(doc.metadata["id"]): doc for doc in retrieved_docs}
-
-        # Sort the documents based on ids_by_experience_list
-        sorted_docs = [doc_dict[doc_id] for doc_id in ids_by_experience_list]
-
-        return sorted_docs
-
-    @staticmethod
-    def enchance_cv(pdf_documents: list[Document]):
-        pass
-
-    @staticmethod
-    def main():
-        query = "stem innovation olympiad silver award"
-        print(f"\nQuerying for: {query}\n")
-        retrieved_docs = AIController.similarity_search(query=query)
-        docs_by_experience = asyncio.run(AIController.sort_retrieved_docs_by_experience(retrieved_docs=retrieved_docs))
-        print([doc.metadata["id"] for doc in docs_by_experience])
-
-if __name__ == "__main__":
-    AIController.main()
-    
-        retrieved_docs = chromadb.parent_retriever.invoke(input=query, k_size=1001)
-
-        for doc in retrieved_docs:
-           doc_score = str(doc.metadata.get("score"))
-
-           doc.metadata["score"] = doc_score
-
-        return([doc for doc in retrieved_docs])
-
+        if name in self.databases:
+            del self.databases[name]
+            print(f"Database configuration '{name}' deleted successfully.")
+        else:
+            print(f"Database configuration '{name}' not found.")
