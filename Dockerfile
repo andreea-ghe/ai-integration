@@ -13,8 +13,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of your application code into the container
 COPY . .
 
-# Install Ollama
-RUN curl -fsSL https://ollama.com/install.sh | sudo -E sh
+# Install Ollama (without sudo)
+RUN curl -fsSL https://ollama.com/install.sh | sh
 
 # Start the Ollama service and pull the llama3 model
 RUN nohup ollama serve & \
