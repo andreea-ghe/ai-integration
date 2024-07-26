@@ -1,3 +1,3 @@
 print("goodbye")
-print("goodbye world ")
-print("how do i say goodbye")
+print("how do i")
+print("say goodby")
