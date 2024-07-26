@@ -21,11 +21,12 @@ def parse_diff(diff):
             c = int(chunk_header_match.group(3))
             d = int(chunk_header_match.group(4)) if chunk_header_match.group(4) else 1
 
-            start_line_old = a
-            end_line_old = a + b - 1
-            start_line_new = c
-            end_line_new = c + d - 1
-            continue
+            if not (start_line_old and end_line_old and start_line_new and end_line_new):
+                start_line_old = a
+                end_line_old = a + b - 1
+                start_line_new = c
+                end_line_new = c + d - 1
+                continue
         
         if diff_line.startswith('+') and not diff_line.startswith('+++'):
             if start_side is None:
