@@ -71,8 +71,8 @@ jobs:
               line=$(echo "$parsed_values" | awk '{print $2}')
               start_side=$(echo "$parsed_values" | awk '{print $3}')
               side=$(echo "$parsed_values" | awk '{print $4}')
-              echo $start_line, $line, $start_side, $side
               echo "$(cat $diff_file)"
+              echo "here are the values" $start_line, $line, $start_side, $side
               node post-comments.js "hello" "${{ env.COMMIT_ID }}" "$file" "$start_line" "$line" "$start_side" "$side"
             fi
           done
