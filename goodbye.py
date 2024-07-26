@@ -1,41 +1,10 @@
-from typing import Any, Optional
-
+from resumecentral.src.controllers.chromadb import ChromaDatabaseController
 from langchain_core.documents import Document
-from resumecentral.src.chroma.database import ChromaDatabase
+import shutil
+import os
 
-
-class ChromaDatabaseController:
-
-    
-        
-          
-    
-
-        
-        Expand All
-    
-    @@ -15,16 +14,16 @@ def __init__(self) -> None:
-  
+class AIController:
     def __init__(self) -> None:
-        """
-        Initializes the ChromaDatabaseController instance, setting up an empty dictionary to store database configurations.
-        """
-        self.databases = {}
-    def create_database(
-        self,
-        name: str,
-        db_path: str,
-        chunk_size: int,
-        chunk_overlap: int,
-        collection: Optional[Any] = None,
-        collection_name: str = "chunk_collection",
-        embedding_model_name: str = "sentence-transformers/all-mpnet-base-v2",
-        embedding_model_kwargs: dict = {"device": "cpu"},
-        embedding_encode_kwargs: dict = {"normalize_embeddings": False},
-        documents: list[Document] = [],
-    ):
-        """
-        Creates a new ChromaDatabase instance with the specified parameters and adds it to the controller's database dictionary.
 
     
         
@@ -45,69 +14,70 @@ class ChromaDatabaseController:
         
         Expand All
     
-    @@ -49,20 +48,21 @@ def create_database(
+    @@ -14,7 +18,6 @@ def similarity_search(query: str, chunk_size: int = 128):
   
-        Parameters:
-            name (str): The name of the database configuration.
-            collection_name (str): The name of the default collection within the database.
-            db_path (str): The file system path to the database.
-            embedding_model_name (str): The name of the embedding model to use for document embeddings.
-            embedding_model_kwargs (dict): Additional keyword arguments for the embedding model.
-            embedding_encode_kwargs (dict): Additional keyword arguments for the embedding function.
-            chunk_size (int): The size of each text chunk.
-            chunk_overlap (int): The number of characters to overlap between chunks.
-            documents (list[Document]): A list of Document objects to be added to the retriever.
-        Returns:
-            The newly created ChromaDatabase instance.
-        Raises:
-            ValueError: If the database already exists in the databases dictinary.
-        """
-        if name in self.databases:
-            raise ValueError(f"A database with the name '{name}' already exists.")
+        pass
+    @staticmethod
+    def similarity_search(query: str, chunk_size: int = 128):
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        src = os.path.dirname(current_dir)
 
-        chroma_db = ChromaDatabase(
-            db_path=db_path,
-            chunk_size=chunk_size,
-            chunk_overlap=chunk_overlap,
-            collection=collection,
-            collection_name=collection_name,
-            embedding_model_name=embedding_model_name,
-            embedding_model_kwargs=embedding_model_kwargs,
-            embedding_encode_kwargs=embedding_encode_kwargs,
-            documents=documents,
-        )
 
-        self.databases[name] = chroma_db
-        return chroma_db
-
-    def get_database(self, name: str):
-        """
-        Retrieves a ChromaDatabase instance by its configuration name.
+        vectorstore_path = os.path.join(src, "chroma/vectorstore/")
+        cache_path = os.path.join(src, "chroma/__pycache__")
+        '''
+        if os.path.exists(cache_path):
+            shutil.rmtree(cache_path)
 
     
+        
           
+    
+
+        
+        Expand All
+    
+    @@ -32,7 +35,6 @@ def similarity_search(query: str, chunk_size: int = 128):
+  
             
+        if os.path.exists(vectorstore_path):
+            shutil.rmtree(vectorstore_path)
+        '''
+        chromadb_controller = ChromaDatabaseController()
+        chromadb_name = "similarity_chromadb"
+        overlap = int(chunk_size / 5.0)
+        chromadb_controller.create_database(name=chromadb_name, db_path=vectorstore_path , chunk_size=chunk_size, chunk_overlap=overlap)
+        chromadb = chromadb_controller.get_database(name=chromadb_name)
+
+        # Aici incepe requestul de la interfata
+        resumes = chromadb.get_resumes_from_sqlite3_database()
+
+        pdf_documents = chromadb.load_resumes(resumes=resumes)
+
+    
+        
+          
     
 
-          
-          Expand Down
+        
+        Expand All
     
-    
+    @@ -44,14 +46,113 @@ def similarity_search(query: str, chunk_size: int = 128):
   
-        Parameters:
-            name (str): The name of the database configuration to retrieve.
-        Returns:
-            The ChromaDatabase instance if found, otherwise None.
-        """
-        return self.databases.get(name)
-    def delete_database(self, name: str) -> None:
-        """
-        Deletes a database configuration from the controller.
-        Parameters:
-            name (str): The name of the database configuration to delete.
-        """
-        if name in self.databases:
-            del self.databases[name]
-            print(f"Database configuration '{name}' deleted successfully.")
-        else:
-            print(f"Database configuration '{name}' not found.")
+        for document in pdf_documents:
+            content = document.page_content
+            cleaned_content = chromadb.clean_text(text=content)
+            document.page_content = cleaned_content
+
+        # This will populate both the vectorstore and the docstore
+        chromadb.parent_retriever.add_documents(documents=pdf_documents)
+    
+        retrieved_docs = chromadb.parent_retriever.invoke(input=query, k_size=1001)
+
+        for doc in retrieved_docs:
+           doc_score = str(doc.metadata.get("score"))
+
+           doc.metadata["score"] = doc_score
+
+        return([doc for doc in retrieved_docs])
+
