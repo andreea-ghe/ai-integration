@@ -4,6 +4,9 @@ from langchain_core.documents import Document
 from resumecentral.src.chroma.database import ChromaDatabase
 
 
+from chroma.database import ChromaDatabase
+
+
 class ChromaDatabaseController:
 
     
@@ -34,6 +37,16 @@ class ChromaDatabaseController:
         embedding_encode_kwargs: dict = {"normalize_embeddings": False},
         documents: list[Document] = [],
     ):
+        collection: Optional[Any] = None,
+        collection_name: str = "chunk_collection",
+        db_path: str = "vectorstore",
+        embedding_model_name: str = "sentence-transformers/all-mpnet-base-v2",
+        embedding_model_kwargs: dict = {"device": "cpu"},
+        embedding_encode_kwargs: dict = {"normalize_embeddings": False},
+        chunk_size: int = 128,
+        chunk_overlap: int = 32,
+        documents: list[Document] = [],
+    ) -> ChromaDatabase:
         """
         Creates a new ChromaDatabase instance with the specified parameters and adds it to the controller's database dictionary.
 
@@ -81,6 +94,20 @@ class ChromaDatabaseController:
         return chroma_db
 
     def get_database(self, name: str):
+            collection=collection,
+            collection_name=collection_name,
+            db_path=db_path,
+            embedding_model_name=embedding_model_name,
+            embedding_model_kwargs=embedding_model_kwargs,
+            embedding_encode_kwargs=embedding_encode_kwargs,
+            chunk_size=chunk_size,
+            chunk_overlap=chunk_overlap,
+            documents=documents,
+        )
+        self.databases[name] = chroma_db
+        return chroma_db
+
+    def get_database(self, name: str) -> Optional[ChromaDatabase]:
         """
         Retrieves a ChromaDatabase instance by its configuration name.
 
