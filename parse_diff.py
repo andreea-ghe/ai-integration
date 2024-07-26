@@ -40,5 +40,6 @@ def parse_diff(diff):
 
 if __name__ == "__main__":
     diff = sys.stdin.read()
+    print(diff)
     start_line, line, start_side, side = parse_diff(diff)
     print(f"{start_line} {line} {start_side} {side}")
