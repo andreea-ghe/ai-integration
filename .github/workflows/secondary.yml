@@ -9,11 +9,29 @@ jobs:
   code_review:
     runs-on: ubuntu-latest
 
+    container:
+      image: andreeaghe/my-github-workflow-image
+      options: --entrypoint /bin/bash
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Start Ollama Service
+        run: |
+          nohup ollama serve &
+          sleep 5
+
+      - name: Pull Llama3 Model
+        run: |
+          ollama run llama3
 
       - name: Fetch Base Branch
         run: git fetch origin main:main
@@ -45,6 +63,11 @@ jobs:
               rm -f "diffs/$file.diff"
             fi
           done
+
+      - name: Run Python Script
+        run: |
+          changed_files="${{ steps.changed-files.outputs.all_changed_files }}"
+          python3 aux.py "$changed_files"
 
       - name: Install Octokit
         run: npm install @octokit/core
