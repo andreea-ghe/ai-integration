@@ -25,12 +25,10 @@ RUN pip install --upgrade pip && \
 # Install Ollama
 RUN curl -fsSL https://ollama.com/install.sh | sh
 
-# Run Ollama service
-RUN nohup ollama serve & \
-    sleep 5
-
-# Pull the Llama3 model
-RUN ollama run llama3
-
 # Expose port 11434 to the outside world
 EXPOSE 11434
+
+# Start Ollama service and pull the Llama3 model
+RUN nohup ollama serve & \
+    sleep 10 && \
+    ollama pull llama3
