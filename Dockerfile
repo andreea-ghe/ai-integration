@@ -26,7 +26,8 @@ RUN pip install --upgrade pip && \
 RUN curl -fsSL https://ollama.com/install.sh | sh
 
 # Run Ollama service
-RUN nohup ollama serve &
+RUN nohup ollama serve & \
+    sleep 5
 
 # Pull the Llama3 model
 RUN ollama pull llama3
