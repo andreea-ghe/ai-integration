@@ -23,6 +23,7 @@ jobs:
 
       - name: Start Ollama Service
         run: |
+          docker images
           nohup ollama serve &
           sleep 5
           curl -i http://localhost:11434
