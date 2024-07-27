@@ -1,4 +1,4 @@
-name: GPT Code Review
+name: Auxiliary
 
 on:
   pull_request:
@@ -9,7 +9,7 @@ jobs:
   code_review:
     runs-on: ubuntu-latest
     container:
-      image: yourusername/gpt-code-review:latest
+      image: andreeaghe/gpt-code-review:latest
       env:
         NODE_ENV: development
       ports:
