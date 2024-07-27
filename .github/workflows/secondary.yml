@@ -10,11 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: andreeaghe/gpt-code-review:latest
-      env:
-        NODE_ENV: development
       ports:
         - 11434:11434
-      options: --cpus 1
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
