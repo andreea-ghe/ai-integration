@@ -18,7 +18,7 @@ jobs:
       - name: Use Docker Container
         uses: addnab/docker-run-action@v3
         with:
-          image: yourusername/gpt-code-review
+          image: andreeaghe/gpt-code-review
           options: --entrypoint ""
 
       - name: Start Ollama Service
