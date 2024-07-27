@@ -22,6 +22,9 @@ jobs:
       - name: Check for dockerenv file
         run: (ls /.dockerenv && echo Found dockerenv) || (echo No dockerenv)
 
+      - name: Configure Git Safe Directory
+        run: git config --global --add safe.directory /__w/ai-integration/ai-integration
+
       - name: Start Ollama Service
         run: |
           nohup ollama serve &
