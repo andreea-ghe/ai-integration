@@ -1,25 +1,35 @@
 # Use an official Python runtime as a parent image
-FROM python:3.11
+FROM python:3.11-slim
 
 # Set the working directory in the container
 WORKDIR /app
 
-# Copy the requirements file into the container
-COPY requirements.txt .
+# Copy the current directory contents into the container at /app
+COPY . /app
 
-# Install any dependencies specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+# Install Node.js and npm
+RUN apt-get update && apt-get install -y \
+    curl \
+    gnupg && \
+    curl -fsSL https://deb.nodesource.com/setup_16.x | bash - && \
+    apt-get install -y nodejs && \
+    apt-get clean
 
-# Copy the rest of your application code into the container
-COPY . .
+# Install Octokit
+RUN npm install @octokit/core
 
-# Install Ollama (without sudo)
+# Install Python dependencies
+RUN pip install --upgrade pip && \
+    pip install -r requirements.txt
+
+# Install Ollama
 RUN curl -fsSL https://ollama.com/install.sh | sh
 
-# Start the Ollama service and pull the llama3 model
-RUN nohup ollama serve & \
-    sleep 5 && \
-    ollama run llama3
+# Pull the Llama3 model
+RUN ollama pull llama3
 
-# Keep the container running
-CMD ["tail", "-f", "/dev/null"]
+# Run Ollama service
+RUN nohup ollama serve &
+
+# Expose port 11434 to the outside world
+EXPOSE 11434
