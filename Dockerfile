@@ -30,7 +30,7 @@ RUN nohup ollama serve & \
     sleep 5
 
 # Pull the Llama3 model
-RUN ollama pull llama3
+RUN ollama run llama3
 
 # Expose port 11434 to the outside world
 EXPOSE 11434
