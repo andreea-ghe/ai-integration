@@ -28,7 +28,7 @@ jobs:
       - name: Start Ollama Service
         run: |
           nohup ollama serve &
-          sleep 5
+          sleep 10
           curl -i http://localhost:11434
 
       - name: Fetch Base Branch
