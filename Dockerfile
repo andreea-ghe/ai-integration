@@ -1,5 +1,5 @@
 # Use an official Python runtime as a parent image
-FROM python:3.9
+FROM python:3.11
 
 # Set the working directory in the container
 WORKDIR /app
@@ -21,5 +21,5 @@ RUN nohup ollama serve & \
     sleep 5 && \
     ollama run llama3
 
-# Specify the command to run your application (modify this as per your needs)
-CMD ["python", "your_script.py"]
+# Keep the container running
+CMD ["tail", "-f", "/dev/null"]
