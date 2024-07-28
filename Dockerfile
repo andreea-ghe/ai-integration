@@ -17,8 +17,8 @@ RUN apt-get update && apt-get install -y \
     apt-get install -y nodejs && \
     apt-get clean
 
-# Install Octokit
-RUN npm install @octokit/core
+# Install Octokit and node-fetch
+RUN npm install @octokit/core node-fetch
 
 # Install Python dependencies
 RUN pip install --upgrade pip && \
@@ -27,12 +27,11 @@ RUN pip install --upgrade pip && \
 # Install Ollama
 RUN curl -fsSL https://ollama.com/install.sh | sh
 
+# Pull the Llama3 model
+RUN nohup ollama serve > ollama.log 2>&1 & sleep 10 && ollama pull llama3
+
 # Expose port 11434 to the outside world
 EXPOSE 11434
-
-RUN nohup ollama serve & \
-    sleep 5 && \
-    ollama pull llama3
 
 # Start Ollama service and keep the container running
 CMD nohup ollama serve > ollama.log 2>&1 & tail -f /dev/null
