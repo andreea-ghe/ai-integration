@@ -30,6 +30,11 @@ jobs:
           nohup ollama serve &
           sleep 5
           curl -i http://localhost:11434
+          tail -f /dev/null &
+
+      - name: Pull llama model
+        run: |
+          ollama pull llama3
  
       - name: Fetch Base Branch
         run: git fetch origin main:main
