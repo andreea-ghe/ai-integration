@@ -122,5 +122,5 @@ jobs:
                 > aux.txt
             fi
           done < reviews.txt
-        # shell: bash
+          shell: bash
 
