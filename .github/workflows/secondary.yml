@@ -24,7 +24,7 @@ jobs:
 
       - name: Start Ollama Service
         run: |
-          nohup ollama serve &
+          nohup ollama serve > ollama.log 2>&1 &
           sleep 5 # Increased sleep time to ensure service is running
           curl -i http://localhost:11434 || (cat ollama.log && exit 1)
           # tail -f /dev/null &
