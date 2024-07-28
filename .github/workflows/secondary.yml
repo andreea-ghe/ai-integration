@@ -26,7 +26,7 @@ jobs:
         run: |
           nohup ollama serve &
           sleep 5 # Increased sleep time to ensure service is running
-          curl -i http://localhost:11434 # || exit 1
+          curl -i http://localhost:11434 || (cat ollama.log && exit 1)
           # tail -f /dev/null &
 
       - name: Fetch Base Branch
