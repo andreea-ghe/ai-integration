@@ -88,7 +88,7 @@ jobs:
           file_names=()
           diff=""
           review=""
- 
+
           # Read from the file reviews.txt
           while IFS= read -r line; do
             if [[ $line == "FILE: "* ]]; then
@@ -105,10 +105,10 @@ jobs:
                     [[ $review_line == "ENDREVIEW" ]] && break
                     review+="$review_line"$'\n'
                 done
- 
+
                 # Write the review to aux.txt
                 echo -e "$review" >> aux.txt
- 
+
                 # Display the content of aux.txt
                 cat aux.txt
 
@@ -119,10 +119,10 @@ jobs:
                 line=$(echo "$parsed_values" | awk '{print $2}')
                 start_side=$(echo "$parsed_values" | awk '{print $3}')
                 side=$(echo "$parsed_values" | awk '{print $4}')
-                
+
                 node post-comments.js "$escaped_comments" "${{ github.event.pull_request.head.sha }}" "${file_names[-1]}" "$start_line" "$line" "$start_side" "$side"
 
                 > aux.txt
             fi
           done < reviews.txt
-
+        shell: bash
