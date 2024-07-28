@@ -74,6 +74,9 @@ jobs:
         id: get_commit
         run: echo "commit_id=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
+      - name: Install Octokit
+        run: npm install @octokit/core
+
       - name: Add Code Suggestions Comments
         env:
           COMMIT_ID: ${{ github.event.pull_request.head.sha }}
