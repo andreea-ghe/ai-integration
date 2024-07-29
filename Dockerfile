@@ -28,14 +28,10 @@ RUN pip install --upgrade pip && \
 # Install Ollama
 RUN curl -fsSL https://ollama.com/install.sh | sh
 
-# Copy the script to pull the model
-COPY pull_model.sh /app/pull_model.sh
-
-# Make the script executable
-RUN chmod +x /app/pull_model.sh
-
-# Pull the Llama3 model
-RUN /app/pull_model.sh
+# Start Ollama service and pull the Llama3 model
+RUN nohup ollama serve > ollama.log 2>&1 & \
+    sleep 10 && \
+    ollama pull llama3
 
 # Use a smaller runtime image
 FROM python:3.11-slim
