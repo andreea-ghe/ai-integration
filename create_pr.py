@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 load_dotenv()
  
 # Get environment variables
-GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
+GITHUB_TOKEN = os.getenv("MY_GITHUB_TOKEN")
 REPO_NAME = "andreeaghe/code-review"
  
 if not GITHUB_TOKEN or not REPO_NAME:
