@@ -8,30 +8,33 @@ on:
 jobs:
   code_review:
     runs-on: ubuntu-latest
-    container:
-      image: andreeaghe/gpt-code-review:latest
-      ports:
-        - 11434:11434
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
-      - name: Check for dockerenv file
-        run: (ls /.dockerenv && echo Found dockerenv) || (echo No dockerenv)
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
 
-      - name: Configure Git Safe Directory
-        run: git config --global --add safe.directory /__w/ai-integration/ai-integration
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
 
-      - name: Start Ollama Service
-        run: |
-          nohup ollama serve > ollama.log 2>&1 &
-          sleep 5 # Increased sleep time to ensure service is running
-          curl -i http://localhost:11434 || (cat ollama.log && exit 1)
-          tail -f /dev/null &
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: andreeaghe/gpt-code-review:latest
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
 
-      - name: Pull llama model
-        run: |
-          ollama pull llama3
+      - name: Run the Docker container
+        run: docker run -d -p 11434:11434 andreeaghe/gpt-code-review:latest
 
       - name: Fetch Base Branch
         run: git fetch origin main:main
