@@ -17,18 +17,27 @@ RUN apt-get update && apt-get install -y \
     apt-get install -y nodejs && \
     apt-get clean
 
-# Install Octokit and node-fetch
-RUN npm install @octokit/core node-fetch
+# Install Yarn
+RUN npm install -g yarn
+
+# Install Octokit and node-fetch using Yarn
+RUN yarn add @octokit/core node-fetch
 
 # Install Python dependencies
 RUN pip install --upgrade pip && \
-    pip install -r requirements.txt
+    pip install ollama litellm python-dotenv openai
 
 # Install Ollama
 RUN curl -fsSL https://ollama.com/install.sh | sh
 
+# Copy the script to pull the model
+COPY pull_model.sh /app/pull_model.sh
+
+# Make the script executable
+RUN chmod +x /app/pull_model.sh
+
 # Pull the Llama3 model
-RUN nohup ollama serve > ollama.log 2>&1 & sleep 10 && ollama pull llama3
+RUN /app/pull_model.sh
 
 # Expose port 11434 to the outside world
 EXPOSE 11434
