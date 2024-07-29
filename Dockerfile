@@ -18,11 +18,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Install Yarn
-RUN npm install -g yarn
-
-# Install Octokit and node-fetch using Yarn
-RUN yarn add @octokit/core node-fetch
+# Install Octokit and node-fetch using npm
+RUN npm install @octokit/core node-fetch
 
 # Install Python dependencies
 RUN pip install --upgrade pip && \
