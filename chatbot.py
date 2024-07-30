@@ -50,11 +50,12 @@ Full code:
 Your review:"""
 
     response = completion(
-        model="ollama/llama3",
+        model="llama3.1-70b",
+        provider="ollama",
         messages=[
             {"role": "system", "content": system_message},
         ],
-        api_base="http://localhost:11434"
+        api_base="http://http://10.20.3.54:11434"
     )
 
     return response['choices'][0]['message']['content']
