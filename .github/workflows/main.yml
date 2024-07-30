@@ -22,12 +22,10 @@ jobs:
       - name: Configure Git Safe Directory
         run: git config --global --add safe.directory /__w/ai-integration/ai-integration
 
-      - name: Start Ollama Service
+      - name: Verify Existing Ollama Service
         run: |
-          nohup ollama serve > ollama.log 2>&1 &
-          sleep 5 # Increased sleep time to ensure service is running
-          curl -i http://localhost:11434 || (cat ollama.log && exit 1)
-          tail -f /dev/null &
+          curl -i http://10.20.3.54:11434 || (echo "Server is not running at http://10.20.3.54:11434" && exit 1)
+
  
       - name: Fetch Base Branch
         run: git fetch origin main:main
