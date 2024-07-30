@@ -50,8 +50,7 @@ Full code:
 Your review:"""
 
     response = completion(
-        model="llama3.1-70b",
-        provider="ollama",
+        model="ollama/llama3.1-70b",
         messages=[
             {"role": "system", "content": system_message},
         ],
