@@ -54,7 +54,7 @@ Your review:"""
         messages=[
             {"role": "system", "content": system_message},
         ],
-        url_base="https://5f6a-5-2-197-51.ngrok-free.app"
+        server_url="https://96e0-5-2-197-51.ngrok-free.app/api/generate"
     )
 
     return response['choices'][0]['message']['content']
