@@ -54,7 +54,7 @@ Your review:"""
         messages=[
             {"role": "system", "content": system_message},
         ],
-        url_base="http://http://10.20.3.54:11434"
+        url_base="https://5f6a-5-2-197-51.ngrok-free.app"
     )
 
     return response['choices'][0]['message']['content']
