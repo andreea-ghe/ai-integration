@@ -54,7 +54,7 @@ Your review:"""
         messages=[
             {"role": "system", "content": system_message},
         ],
-        api_base="http://http://10.20.3.54:11434"
+        url_base="http://http://10.20.3.54:11434"
     )
 
     return response['choices'][0]['message']['content']
