@@ -7,6 +7,7 @@ load_dotenv()
 
 def generate_feedback(diff, code_content):
     """Generate feedback using OpenAI GPT model."""
+    server_url = os.getenv('SERVER_URL', 'http://localhost:11434')  # Default to localhost if SERVER_URL not set
     system_message = f"""\
 I will provide for you the differences extracted with a github function between
 the initial and the final code and also the initial code. Please review these 
@@ -49,54 +50,10 @@ Full code:
 
 Your review:"""
 
-    response = completion(
-        model="ollama/llama3.1-70b",
-        messages=[
-            {"role": "system", "content": system_message},
-        ],
-        server_url="https://96e0-5-2-197-51.ngrok-free.app/api/generate"
-    )
-
-    return response['choices'][0]['message']['content']
-
-def review_code_diffs(diffs, file_contents):
-    review_results = []
-    for file_name, diff in diffs.items():
-        print("The differences are:\n", diff)
-        if diff:
-            code_content = file_contents.get(file_name, "")
-            answer = generate_feedback(diff, code_content)
-            review_results.append(f"FILE: {file_name}\nDIFF: {diff}\nENDDIFF\nREVIEW: \n{answer}\nENDREVIEW")
-
-    return "\n".join(review_results)
-
-def get_file_diffs(file_list):
-    diffs = {}
-    for file_name in file_list.split():
-        diff_file = f"diffs/{file_name}.diff"
-        if os.path.exists(diff_file):
-            with open(diff_file, 'r') as file:
-                diff = file.read()
-            diffs[file_name] = diff
-    return diffs
-
-def get_file_contents(file_list):
-    contents = {}
-    for file_name in file_list.split():
-        if os.path.exists(file_name):
-            with open(file_name, 'r') as file:
-                content = file.read()
-            contents[file_name] = content
-    return contents
-
-if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: python chatbot.py <file_names>")
-        sys.exit(1)
-    
-    files = sys.argv[1]
-    file_diffs = get_file_diffs(files)
-    file_contents = get_file_contents(files)
-    result = review_code_diffs(file_diffs, file_contents)
-    with open('reviews.txt', 'w') as output_file:
-        output_file.write(result)
+    try:
+        response = completion(
+            model="ollama/llama3.1-70b",
+            messages=[
+                {"role": "system", "content": system_message},
+            ],
+            server_url=f"{server_url
