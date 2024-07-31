@@ -5,9 +5,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-def generate_feedback(diff, code_content):
+def generate_feedback(diff, code_content, server_url):
     """Generate feedback using OpenAI GPT model."""
-    server_url = os.getenv('SERVER_URL', 'http://localhost:11434')  # Default to localhost if SERVER_URL not set
     system_message = f"""\
 I will provide for you the differences extracted with a github function between
 the initial and the final code and also the initial code. Please review these 
