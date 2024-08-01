@@ -6,6 +6,7 @@ on:
       base_branch:
         description: 'Base branch to compare against'
         required: true
+        type: string
       token:
         description: 'GitHub Token'
         required: true
