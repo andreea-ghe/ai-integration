@@ -22,9 +22,13 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.token }}
 
-      - name: Clone Scripts Repository
+      - name: Clone Scripts Repository if Empty
         run: |
-          git clone https://github.com/andreea-ghe/ai-integration.git /home/runner/work/test/test
+          if [ -z "$(ls -A /path/to/directory)" ]; then
+            git clone https://github.com/andreea-ghe/ai-integration.git /home/runner/work/test/test
+          else
+            echo "Directory is not empty, skipping clone"
+          fi
 
       - name: Cache Python Packages
         uses: actions/cache@v3
@@ -76,7 +80,7 @@ jobs:
           MY_URL: ${{ secrets.MY_SECRET_URL }}
         run: |
           changed_files="${{ steps.changed-files.outputs.all_changed_files }}"
-          python3 /home/runner/work/test/test chatbot.py "$changed_files"
+          python3 /home/runner/work/test/test/chatbot.py "$changed_files"
           cat reviews.txt
 
       - name: Get Latest Commit ID
