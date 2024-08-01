@@ -24,7 +24,7 @@ jobs:
 
       - name: Clone Scripts Repository if Empty
         run: |
-          if [ -z "$(ls -A /path/to/directory)" ]; then
+          if [ -z "$(ls -A /home/runner/work/test/test)" ]; then
             git clone https://github.com/andreea-ghe/ai-integration.git /home/runner/work/test/test
           else
             echo "Directory is not empty, skipping clone"
