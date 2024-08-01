@@ -133,12 +133,12 @@ jobs:
                 # Display the content of aux.txt
                 cat aux.txt
                 escaped_comments=$(echo "$(cat aux.txt)" | jq -s -R -r @json)
-                parsed_values=$(python3 parse_diff.py <<< "$diff")
+                parsed_values=$(python3 /home/runner/work/test/test/clone/parse_diff.py <<< "$diff")
                 start_line=$(echo "$parsed_values" | awk '{print $1}')
                 line=$(echo "$parsed_values" | awk '{print $2}')
                 start_side=$(echo "$parsed_values" | awk '{print $3}')
                 side=$(echo "$parsed_values" | awk '{print $4}')
-                node post-comments.mjs "$escaped_comments" "${{ github.event.pull_request.head.sha }}" "${file_names[-1]}" "$start_line" "$line" "$start_side" "$side"
+                node /home/runner/work/test/test/clone/post-comments.mjs "$escaped_comments" "${{ github.event.pull_request.head.sha }}" "${file_names[-1]}" "$start_line" "$line" "$start_side" "$side"
                 > aux.txt
             fi
           done < reviews.txt
