@@ -1,8 +1,8 @@
-async function postCommentToGitHub(comment_body, commit_id, file_path, start_line, line, start_side, side) {
-  const { Octokit } = await import('@octokit/core');
-  const fetch = require('node-fetch');
+import { Octokit } from '@octokit/core';
 
+async function postCommentToGitHub(comment_body, commit_id, file_path, start_line, line, start_side, side) {
   try {
+    const { default: fetch } = await import('node-fetch');
     const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN, request: { fetch }});
 
     comment_body = comment_body.replace(/\\n/g, '\n').replace(/\\t\+/g, '    ');
@@ -12,7 +12,6 @@ async function postCommentToGitHub(comment_body, commit_id, file_path, start_lin
     const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
     const pull_number = process.env.GITHUB_EVENT_NUMBER;
 
-    // console.log('Repository Info:', { owner, repo, pull_number });
     console.log(comment_body);
 
     let response;
