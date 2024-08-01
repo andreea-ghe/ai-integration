@@ -6,6 +6,7 @@ on:
       base_branch:
         description: 'Base branch to compare against'
         required: true
+        type: string
       token:
         description: 'GitHub Token'
         required: true
@@ -19,6 +20,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+          token: ${{ inputs.token }}
 
       - name: Cache Python Packages
         uses: actions/cache@v3
