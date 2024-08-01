@@ -1,20 +1,20 @@
 name: GPT Code Review
 
 on:
-  # workflow_call:
-  #   inputs:
-  #     base_branch:
-  #       description: 'Base branch to compare against'
-  #       required: true
-  #       type: string
-  #   secrets:
-  #     token:
-  #       description: 'GitHub Token'
-  #       required: true
+  workflow_call:
+    inputs:
+      base_branch:
+        description: 'Base branch to compare against'
+        required: true
+        type: string
+    secrets:
+      token:
+        description: 'GitHub Token'
+        required: true
 
-  pull_request:
-    types: [opened, synchronize, reopened]
-  workflow_dispatch:
+  # pull_request:
+  #   types: [opened, synchronize, reopened]
+  # workflow_dispatch:
 
 jobs:
   code_review:
@@ -24,16 +24,16 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      #   token: ${{ secrets.token }}
+        token: ${{ secrets.token }}
 
-      # - name: Clone Scripts Repository if Empty
-      #   run: |
-      #     ls -l /home/runner/work/test/test
-      #     if [ -z "$(ls -A /home/runner/work/test/test/clone)" ]; then
-      #       git clone https://github.com/andreea-ghe/ai-integration.git /home/runner/work/test/test/clone
-      #     else
-      #       echo "Directory is not empty, skipping clone"
-      #     fi
+      - name: Clone Scripts Repository if Empty
+        run: |
+          ls -l /home/runner/work/test/test
+          if [ -z "$(ls -A /home/runner/work/test/test/clone)" ]; then
+            git clone https://github.com/andreea-ghe/ai-integration.git /home/runner/work/test/test/clone
+          else
+            echo "Directory is not empty, skipping clone"
+          fi
 
       - name: Cache Python Packages
         uses: actions/cache@v3
@@ -85,8 +85,8 @@ jobs:
           MY_URL: ${{ secrets.MY_SECRET_URL }}
         run: |
           changed_files="${{ steps.changed-files.outputs.all_changed_files }}"
-          # python3 /home/runner/work/test/test/clone/chatbot.py "$changed_files"
-          python3 chatbot.py "$changed_files"
+          python3 /home/runner/work/test/test/clone/chatbot.py "$changed_files"
+          # python3 chatbot.py "$changed_files"
           cat reviews.txt
 
       - name: Get Latest Commit ID
