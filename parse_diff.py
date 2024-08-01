@@ -26,7 +26,7 @@ def parse_diff(diff):
             start_line_new = c
             end_line_new = c + d - 1
             continue
-        
+
         if diff_line.startswith('+') and not diff_line.startswith('+++'):
             if start_side is None:
                 start_side = 'RIGHT'
