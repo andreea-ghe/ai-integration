@@ -1,3 +1,4 @@
+
 name: GPT Code Review
 
 on:
@@ -10,6 +11,9 @@ on:
     secrets:
       token:
         description: 'GitHub Token'
+        required: true
+      secret_url:
+        description: 'Ngrok url'
         required: true
 
   # pull_request:
@@ -25,6 +29,7 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.token }}
+          secret_url: ${{ secrets.secret_url }}
 
       - name: Clone Scripts Repository if Empty
         run: |
@@ -82,7 +87,7 @@ jobs:
 
       - name: Run Python Script
         env:
-          MY_URL: ${{ secrets.MY_SECRET_URL }}
+          MY_URL: ${{ secrets.secret_url}}
         run: |
           changed_files="${{ steps.changed-files.outputs.all_changed_files }}"
           python3 /home/runner/work/test/test/clone/chatbot.py "$changed_files"
@@ -101,7 +106,7 @@ jobs:
           COMMIT_ID: ${{ github.event.pull_request.head.sha }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_EVENT_NUMBER: ${{ github.event.number }}
-          GITHUB_TOKEN: ${{ inputs.token }}
+          GITHUB_TOKEN: ${{ secrets.token }}
         run: |
           commit_id=${{ env.commit_id }}
           file_names=()
