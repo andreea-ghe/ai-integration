@@ -1,16 +1,20 @@
 name: GPT Code Review
 
 on:
-  workflow_call:
-    inputs:
-      base_branch:
-        description: 'Base branch to compare against'
-        required: true
-        type: string
-    secrets:
-      token:
-        description: 'GitHub Token'
-        required: true
+  # workflow_call:
+  #   inputs:
+  #     base_branch:
+  #       description: 'Base branch to compare against'
+  #       required: true
+  #       type: string
+  #   secrets:
+  #     token:
+  #       description: 'GitHub Token'
+  #       required: true
+
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
 
 jobs:
   code_review:
@@ -22,14 +26,14 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.token }}
 
-      - name: Clone Scripts Repository if Empty
-        run: |
-          ls -l /home/runner/work/test/test
-          if [ -z "$(ls -A /home/runner/work/test/test/clone)" ]; then
-            git clone https://github.com/andreea-ghe/ai-integration.git /home/runner/work/test/test/clone
-          else
-            echo "Directory is not empty, skipping clone"
-          fi
+      # - name: Clone Scripts Repository if Empty
+      #   run: |
+      #     ls -l /home/runner/work/test/test
+      #     if [ -z "$(ls -A /home/runner/work/test/test/clone)" ]; then
+      #       git clone https://github.com/andreea-ghe/ai-integration.git /home/runner/work/test/test/clone
+      #     else
+      #       echo "Directory is not empty, skipping clone"
+      #     fi
 
       - name: Cache Python Packages
         uses: actions/cache@v3
