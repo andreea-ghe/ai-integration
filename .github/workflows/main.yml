@@ -85,7 +85,8 @@ jobs:
           MY_URL: ${{ secrets.MY_SECRET_URL }}
         run: |
           changed_files="${{ steps.changed-files.outputs.all_changed_files }}"
-          python3 /home/runner/work/test/test/clone/chatbot.py "$changed_files"
+          # python3 /home/runner/work/test/test/clone/chatbot.py "$changed_files"
+          python3 chatbot.py "$changed_files"
           cat reviews.txt
 
       - name: Get Latest Commit ID
