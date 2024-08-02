@@ -4,4 +4,4 @@ print("howdy")
 adieu
 farewell
 aufwiedersehen
-goodbye!
+goodbyee
