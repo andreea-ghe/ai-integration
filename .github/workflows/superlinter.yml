@@ -34,9 +34,10 @@ jobs:
 
       - name: Clone Scripts Repository if Empty
         run: |
-          ls -l /home/runner/work/test/test
+          mkdir -p /home/runner/work/test/test/clone
           if [ -z "$(ls -A /home/runner/work/test/test/clone)" ]; then
-            git clone https://github.com/andreea-ghe/ai-integration.git /home/runner/work/test/test/clone
+            # git clone https://github.com/andreea-ghe/ai-integration.git /home/runner/work/test/test/clone
+            git clone https://x-access-token:${{ secrets.token }}@github.com/andreea-ghe/ai-integration.git /home/runner/work/test/test/clone
           else
             echo "Directory is not empty, skipping clone"
           fi
