@@ -1,6 +1,20 @@
 name: Super-Linter
 
-on: push
+on: 
+ workflow_call:
+    inputs:
+      base_branch:
+        description: 'Base branch to compare against'
+        required: true
+        type: string
+      github_repository:
+        description: 'Github repository'
+        required: true
+        type: string
+    secrets:
+      token:
+        description: 'GitHub Token'
+        required: true
 
 jobs:
   super-lint:
@@ -9,6 +23,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+        with:
+          repository: ${{ inputs.github_repository }}
 
       - name: Set up Python
         uses: actions/setup-python@v2
@@ -24,14 +40,14 @@ jobs:
         uses: github/super-linter@v4
         continue-on-error: true
         env:
-          DEFAULT_BRANCH: main
-          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
+          DEFAULT_BRANCH:  ${{ inputs.base_branch }}
+          GITHUB_TOKEN: ${{ secrets.token }}
 
       - name: Run Push Event Script
         if: ${{ always() }}
         env:
-          MY_GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
+          MY_GITHUB_TOKEN: ${{ secrets.token }}
+          GITHUB_REPOSITORY: ${{ inputs.github_repository }}
         run: |
           echo "Running create_pr.py"
           python create_pr.py
