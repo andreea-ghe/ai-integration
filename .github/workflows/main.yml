@@ -57,6 +57,18 @@ jobs:
               rm -f "diffs/$file.diff"
             fi
           done
+
+      - name: Create All Files Directory
+        run: mkdir -p all_files
+
+      - name: Copy All Files to Directory
+        run: |
+          all_files=$(git ls-tree -r HEAD --name-only)
+          for file in $all_files; do
+            dir_name=$(dirname "$file")
+            mkdir -p "all_files/$dir_name"
+            cp "$file" "all_files/$file"
+          done
           
       - name: Run Python Script
         env:
