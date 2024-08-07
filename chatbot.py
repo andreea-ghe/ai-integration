@@ -17,6 +17,7 @@ class CompletionError(Exception):
 
 def generate_feedback(file_name, diff, code_content):
     """Generate feedback using OpenAI GPT model."""
+    all_files_content = get_all_files_and_content()
     system_message = f"""\
     Hello! 👋
     
@@ -37,10 +38,7 @@ def generate_feedback(file_name, diff, code_content):
     {diff}
     
     Next I will provide for you the name of the file and its content, please verify that the changes brought
-    to the file won't affect the whole project:
-    {
-	get_all_files_and_content()
-    }
+    to the file won't affect the whole project:{all_files_content}
     Thank you for your attention to detail and expertise! 🚀
     Your review:
     """
