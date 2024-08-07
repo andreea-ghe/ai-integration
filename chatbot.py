@@ -13,11 +13,10 @@ load_dotenv()
 class CompletionError(Exception):
     """Custom exception for completion errors"""
     pass
-@retry(stop=stop_after_attempt(3), wait=wait_exponential(), retry=retry_if_exception_type(Exception), before_sleep=before_sleep_log(logger, logging.WARNING))
 
-def generate_feedback(file_name, diff, code_content):
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(), retry=retry_if_exception_type(Exception), before_sleep_log(logger, logging.WARNING))
+def generate_feedback(file_name, diff, code_content, all_files_content):
     """Generate feedback using OpenAI GPT model."""
-    all_files_content = get_all_files_and_content()
     system_message = f"""\
     Hello! 👋
     
@@ -33,16 +32,18 @@ def generate_feedback(file_name, diff, code_content):
     Use bullet points for multiple comments.
     Be specific in your feedback and provide examples if possible.
     
-    This is the file {file_name} which changes i would like you to comment.
+    This is the file {file_name} which changes I would like you to comment on.
     Its Code Changes:
     {diff}
     
-    Next I will provide for you the name of the file and its content, please verify that the changes brought
-    to the file won't affect the whole project:{all_files_content}
+    Next, here is the list of all files and their content to help you understand the overall impact:
+    {all_files_content}
+    
     Thank you for your attention to detail and expertise! 🚀
     Your review:
     """
-    @retry(stop=stop_after_attempt(3), wait=wait_exponential(), retry=retry_if_exception_type(Exception), before_sleep=before_sleep_log(logger, logging.WARNING))
+    
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(), retry=retry_if_exception_type(Exception), before_sleep_log(logger, logging.WARNING))
     def get_completion():
         response = completion(
             model="gpt-4",
@@ -60,13 +61,13 @@ def generate_feedback(file_name, diff, code_content):
         raise CompletionError(f"Failed to generate feedback after 3 retries: {str(e)}")
 
 
-def review_code_diffs(diffs, file_contents):
+def review_code_diffs(diffs, file_contents, all_files_content):
     review_results = []
     for file_name, diff in diffs.items():
         print("The differences are:\n", diff)
         if diff:
             code_content = file_contents.get(file_name, "")
-            answer = generate_feedback(file_name, diff, code_content)
+            answer = generate_feedback(file_name, diff, code_content, all_files_content)
             review_results.append(f"FILE: {file_name}\nDIFF: {diff}\nENDDIFF\nREVIEW: \n{answer}\nENDREVIEW")
 
     return "\n".join(review_results)
@@ -80,7 +81,7 @@ def get_file_contents(file_list):
                 content = file.read()
             contents[file_name] = content
     return contents
- 
+
 
 def get_file_diffs(file_list):
     diffs = {}
@@ -115,6 +116,7 @@ if __name__ == "__main__":
     files = sys.argv[1]
     file_diffs = get_file_diffs(files)
     file_contents = get_file_contents(files)
-    result = review_code_diffs(file_diffs, file_contents)
+    all_files_content = get_all_files_and_content()  # Get contents of all files
+    result = review_code_diffs(file_diffs, file_contents, all_files_content)
     with open('reviews.txt', 'w') as output_file:
         output_file.write(result)
