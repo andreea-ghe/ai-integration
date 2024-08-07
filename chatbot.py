@@ -47,7 +47,7 @@ def generate_feedback(file_name, diff, code_content):
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(), retry=retry_if_exception_type(Exception), before_sleep=before_sleep_log(logger, logging.WARNING))
     def get_completion():
         response = completion(
-            model="ollama/llama3",
+            model="gpt-4",
             messages=[
                 {"role": "system", "content": system_message},
             ],
