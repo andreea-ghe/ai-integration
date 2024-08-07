@@ -38,7 +38,7 @@ def generate_feedback(file_name, diff, code_content, all_files_content):
             messages=[
                 {"role": "system", "content": system_message},
             ],
-            api_base=os.getenv('MY_URL')
+            api_key=os.getenv('MY_URL')
         )
         return response
 
