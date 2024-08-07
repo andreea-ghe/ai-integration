@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type, before_sleep_log
 import logging
 
-# Set up logging.
+# Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 load_dotenv()
@@ -47,7 +47,7 @@ def generate_feedback(file_name, diff, code_content):
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(), retry=retry_if_exception_type(Exception), before_sleep=before_sleep_log(logger, logging.WARNING))
     def get_completion():
         response = completion(
-            model="ollama/llama3",
+            model="gpt-4",
             messages=[
                 {"role": "system", "content": system_message},
             ],
