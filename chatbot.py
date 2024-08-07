@@ -3,18 +3,7 @@ import sys
 from litellm import completion
 from dotenv import load_dotenv
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type, before_sleep_log
-import logging
 
-# Set up logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-load_dotenv()
-
-class CompletionError(Exception):
-    """Custom exception for completion errors"""
-    pass
-
-@retry(stop=stop_after_attempt(3), wait=wait_exponential(), retry=retry_if_exception_type(Exception), before_sleep_log(logger, logging.WARNING))
 def generate_feedback(file_name, diff, code_content, all_files_content):
     """Generate feedback using OpenAI GPT model."""
     system_message = f"""\
@@ -43,7 +32,6 @@ def generate_feedback(file_name, diff, code_content, all_files_content):
     Your review:
     """
     
-    @retry(stop=stop_after_attempt(3), wait=wait_exponential(), retry=retry_if_exception_type(Exception), before_sleep_log(logger, logging.WARNING))
     def get_completion():
         response = completion(
             model="gpt-4",
