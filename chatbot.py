@@ -4,66 +4,46 @@ from litellm import completion
 from dotenv import load_dotenv
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type, before_sleep_log
 import logging
+
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 load_dotenv()
+
 class CompletionError(Exception):
     """Custom exception for completion errors"""
     pass
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(), retry=retry_if_exception_type(Exception), before_sleep=before_sleep_log(logger, logging.WARNING))
-def generate_feedback(diff, code_content):
+
+def generate_feedback(file_name, diff, code_content):
     """Generate feedback using OpenAI GPT model."""
     system_message = f"""\
-I will provide for you the differences extracted with a github function between
-the initial and the final code and also the initial code. Please review these 
-differences in the context of the initial code and identify any syntax or logical
-errors, suggest ways to refactor and improve code quality, enhance performance, 
-address security concerns, and align with best practices. Provide specific examples 
-for each area and limit your recommendations to three per category. 
-
-Use the following response format, and provide
-your feedback. Use bullet points for each response. The provided examples are for
-illustration purposes only and should not be repeated.
-
-
-**Syntax and logical errors**:
-- Incorrect indentation on line 12
-- Missing closing parenthesis on line 23
-
-**Code refactoring and quality**:
-- Replace multiple if-else statements with a switch case for readability
-- Extract repetitive code into separate functions
-
-**Performance optimization**:
-- Use a more efficient sorting algorithm to reduce time complexity
-- Cache results of expensive operations for reuse
-
-**Security vulnerabilities**:
-- Sanitize user input to prevent SQL injection attacks
-- Use prepared statements for database queries
-
-**Best practices**:
-- Add meaningful comments and documentation to explain the code
-- Follow consistent naming conventions for variables and functions
-
-If you do not find any violation of the principles described in each catergory, 
-do not mention the category as it could be misleading. Meaning, if there are no suggestions
-of improvements in the chapter of "Syntax and logical errors", don't write this section,
-if there are no suggestions for "Code refactoring and quality", don't write this section,
-if there are no suggestions regarding "Performance optimization", don't write this section,
-if there are no improvments regarding "Security vulnerabilities", don't write this section,
-if there are no suggestions for "Best practices", don't write this section.
-
-Code changes:
-
-{diff}
-
-Full code:
-
-{code_content}
-
-Your review:"""
+    Hello! 👋
+    
+    Your task is to review the recent code changes and provide detailed feedback. Here’s what you need to do:
+    Review Changes: Examine the code differences and the final code provided. Please focus on differences and its impact on the whole project.
+    Identify Bugs: Point out any bugs or potential issues.
+    Best Practices: Suggest improvements related to coding best practices.
+    Commit Message Alignment: Ensure the code changes align with the descriptions in the commit messages.
+    Security Concerns: Highlight any security vulnerabilities or concerns.
+    
+    Instructions:
+    Focus on major issues and avoid minor stylistic preferences.
+    Use bullet points for multiple comments.
+    Be specific in your feedback and provide examples if possible.
+    
+    This is the file {file_name} which changes i would like you to comment.
+    Its Code Changes:
+    {diff}
+    
+    Next I will provide for you the name of the file and its content, please verify that the changes brought
+    to the file won't affect the whole project:
+    {
+	get_all_files_and_content()
+    }
+    Thank you for your attention to detail and expertise! 🚀
+    Your review:
+    """
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(), retry=retry_if_exception_type(Exception), before_sleep=before_sleep_log(logger, logging.WARNING))
     def get_completion():
         response = completion(
@@ -88,7 +68,7 @@ def review_code_diffs(diffs, file_contents):
         print("The differences are:\n", diff)
         if diff:
             code_content = file_contents.get(file_name, "")
-            answer = generate_feedback(diff, code_content)
+            answer = generate_feedback(file_name, diff, code_content)
             review_results.append(f"FILE: {file_name}\nDIFF: {diff}\nENDDIFF\nREVIEW: \n{answer}\nENDREVIEW")
 
     return "\n".join(review_results)
@@ -113,6 +93,22 @@ def get_file_diffs(file_list):
                 diff = file.read()
             diffs[file_name] = diff
     return diffs
+
+
+def get_all_files_and_content():
+    """Get contents of all files from the 'all_files' directory."""
+    all_files_dir = "all_files"  # Directory where all files are stored
+    all_files_content = ""
+
+    for root, _, files in os.walk(all_files_dir):
+        for file_name in files:
+            file_path = os.path.join(root, file_name)
+            with open(file_path, 'r') as file:
+                content = file.read()
+                all_files_content += f"File name: {file_name}\nContent:\n{content}\n\n"
+    
+    return all_files_content
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: python chatbot.py <file_names>")
